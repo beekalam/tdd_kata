@@ -13,4 +13,12 @@ class StudentController {
     public function aboutAction() {
         return 'about action';
     }
+
+    /**
+     * @Route("/student/{id}/{page}")
+     */
+    public function infoAction()
+    {
+        return 'info action';
+    }
 }

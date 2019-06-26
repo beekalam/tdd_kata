@@ -59,11 +59,26 @@ class Router
             if ($docComment) {
                 $routes[$docComment] = [
                     'controller' => "{$controller}",
-                    'method'     => "{$method->getName()}"
+                    'method'     => "{$method->getName()}",
+                    'params'     => $this->extractRouteParams($docComment),
+                    'parts'      => $this->getRouteParts($docComment)
                 ];
             }
         }
         return $routes;
+    }
+
+    private function extractRouteParams($docComment)
+    {
+        $matches = [];
+        if (preg_match_all("#\{\w+\}#", $docComment, $matches)) {
+            $params = [];
+            foreach ($matches[0] as $match) {
+                $params[] = trim(trim($match, "{"), "}");
+            }
+            return $params;
+        }
+        return [];
     }
 
     private function getMethods($controller)
@@ -91,6 +106,15 @@ class Router
         if (isset($routes[$route])) {
             $controller = $this->getControllerInstance($routes[$route]['controller']);
             return $controller->{$routes[$route]['method']}();
+        } else {
+            $route_parts = $this->getRouteParts($route);
+            $route_parts_count =  count($route_parts);
+            foreach ($routes as $route) {
+                if($route_parts_count == count($route['parts']) && $route_parts[0] == $route['parts'][0]){
+                    $controller = $this->getControllerInstance($route['controller']);
+                    return $controller->{$route['method']}();
+                }
+            }
         }
 
         return "";
@@ -107,6 +131,11 @@ class Router
     {
         $controllerPath = $this->searchPath . DIRECTORY_SEPARATOR . $controller . ".php";
         include_once($controllerPath);
+    }
+
+    private function getRouteParts($docComment)
+    {
+        return explode("/", ltrim($docComment, "/"));
     }
 
 
