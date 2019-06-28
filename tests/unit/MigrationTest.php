@@ -30,4 +30,30 @@ class MigrationTest extends TestCase
         $this->assertEquals($sql, $migration->toString());
 
     }
+
+    /** @test */
+    function it_can_create_foreign_keys()
+    {
+        $migration = new Migration();
+        $migration->build("create_users_table", function ($table) {
+            $table->build('users', function ($table) {
+                $table->increments('id');
+                $table->string('name');
+            });
+        })->build('create_customers_table', function ($table) {
+            $table->build('customers', function ($table) {
+                $table->increments('id');
+                $table->string('name');
+                $table->bigint('user_id');
+                $table->foreign('user_id')->references('id')->on('users');
+            });
+        });
+        $str = $migration->toString();
+        $str = str_replace(',',",\n",$str);
+        var_dump($str);
+
+
+        $this->assertStringContainsString("constraint `customers_user_id_foreign` foreign key ('user_id') references `users` ('id')", $migration->toString());
+
+    }
 }

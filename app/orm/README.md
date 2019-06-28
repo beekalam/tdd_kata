@@ -3,3 +3,4 @@
 - Can build columns dynamically.
 - Can build tables with names.
 - Can emit the final SQL string.
+- Can Create foreign keys.

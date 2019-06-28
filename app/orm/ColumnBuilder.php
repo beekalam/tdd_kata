@@ -12,6 +12,9 @@ class ColumnBuilder
     private $null = "not null";
     private $defaultvalue = null;
     private $autoIncrement = "";
+    private $hasForeignKey = false;
+    private $reference_col;
+    private $reference_table;
 
     public function integer($colName)
     {
@@ -81,13 +84,46 @@ class ColumnBuilder
         return $this;
     }
 
+    public function foreign()
+    {
+        $this->hasForeignKey = true;
+        return $this;
+    }
+
+    public function references($col)
+    {
+        $this->reference_col = $col;
+        return $this;
+    }
+
+    public function on($table)
+    {
+        $this->reference_table = $table;
+        return $this;
+    }
+
     public function toString()
     {
         $str = "{$this->colName} {$this->colType} {$this->null}";
-        if(empty($this->autoIncrement))
+        if (empty($this->autoIncrement))
             $str .= is_null($this->defaultvalue) ? "" : " default '{$this->defaultvalue}'";
         else
             $str .= " {$this->autoIncrement}";
+        return $str;
+    }
+
+
+    public function hasForeignkey()
+    {
+        return $this->hasForeignKey;
+    }
+
+    public function foreignRelationString($table)
+    {
+        $str = '';
+        if ($this->hasForeignKey) {
+            $str .= "constraint `{$table}_{$this->colName}_foreign` foreign key ('{$this->colName}') references `{$this->reference_table}` ('{$this->reference_col}')";
+        }
         return $str;
     }
 }
