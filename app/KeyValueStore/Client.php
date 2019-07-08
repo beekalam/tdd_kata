@@ -4,20 +4,6 @@
 namespace App\KeyValueStore;
 
 
-// $fp = stream_socket_client("tcp://127.0.0.1:1337", $errno, $errstr, 30);
-// if (!$fp) {
-//     echo "$errstr ($errno)<br />\n";
-// } else {
-//     // fwrite($fp, "set a www".PHP_EOL);
-//     // echo fgets($fp);
-//     // fflush($fp);
-//     fwrite($fp, "get a" . PHP_EOL);
-//     echo fgets($fp);
-//     fflush($fp);
-//
-//     fclose($fp);
-// }
-
 class Client
 {
     private $dsn;
@@ -74,10 +60,3 @@ class Client
         fclose($this->fp);
     }
 }
-
-// $client = new Client("tcp://127.0.0.1:1337");
-// echo $client->set('a', 12) . PHP_EOL;
-// echo $client->get('a') . PHP_EOL;
-// echo $client->has('a') . PHP_EOL;
-// echo $client->delete('a') . PHP_EOL;
-// echo $client->has('a') . PHP_EOL;

@@ -4,3 +4,13 @@
 
 # running the server
 $ php ./Server.php
+
+# example
+```php
+ $client = new Client("tcp://127.0.0.1:1337");
+ echo $client->set('a', 12) . PHP_EOL;
+ echo $client->get('a') . PHP_EOL;
+ echo $client->has('a') . PHP_EOL;
+ echo $client->delete('a') . PHP_EOL;
+ echo $client->has('a') . PHP_EOL;
+```
