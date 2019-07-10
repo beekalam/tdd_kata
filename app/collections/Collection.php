@@ -144,13 +144,81 @@ class Collection
 
     public function diff($arr)
     {
-        return collect(array_values(array_diff(array_values($this->arr),array_values($arr))));
+        return collect(array_values(array_diff(array_values($this->arr), array_values($arr))));
     }
 
     public function diffAssoc($arr)
     {
-       return collect(array_diff_assoc($this->arr,$arr));
+        return collect(array_diff_assoc($this->arr, $arr));
     }
+
+    public function diffKeys($arr)
+    {
+        return collect(array_diff_key($this->arr, $arr));
+    }
+
+    public function duplicates($key = null)
+    {
+        $to_filter = is_null($key) ? $this->arr : array_column($this->arr, $key);
+
+        $ans = array_filter(array_count_values($to_filter), function ($v, $k) {
+            return $v > 1;
+        }, ARRAY_FILTER_USE_BOTH);
+
+        return array_keys($ans);
+    }
+
+    public function each($callable)
+    {
+        $arr = [];
+        $cancelled = false;
+        foreach ($this->arr as $key => $item) {
+            if ($cancelled) {
+                $arr[$key] = $item;
+            } else {
+                $cr = $callable($item, $key);
+                if ($cr === false) {
+                    $arr[$key] = $item;
+                    $cancelled = true;
+                } else {
+                    $arr[$key] = $cr;
+                }
+            }
+        }
+        $this->arr = $arr;
+        return $this;
+    }
+
+    public function eachSpread($callable)
+    {
+        $arr = [];
+        $cancelled = false;
+        foreach ($this->arr as $row) {
+            if($cancelled){
+                $arr[] =  $row;
+            }else{
+                if(call_user_func_array($callable, $row) === false){
+                    $cancelled = true;
+                    $arr[] = $row;
+                }else{
+                    $arr[] = call_user_func_array($callable, $row);
+                }
+            }
+        }
+        $this->arr = $arr;
+        return $this;
+    }
+
+    // private function getClosureParameters($closure)
+    // {
+    //     $arguments = (new \ReflectionFunction($closure))->getParameters();
+    //     $params = [];
+    //     foreach ($arguments as $arg) {
+    //         $params[] = $arg->name;
+    //     }
+    //     return $params;
+    // }
+
 
     public function toArray()
     {

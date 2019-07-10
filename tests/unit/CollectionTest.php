@@ -217,4 +217,96 @@ class CollectionTest extends TestCase
         $this->assertEquals(['color' => 'orange', 'remain' => 6], $diff->all());
     }
 
+    /** @test */
+    function can_return_values_in_collection_that_are_in_another_array_based_on_their_keys()
+    {
+        $collection = collect([
+            'one'   => 10,
+            'two'   => 20,
+            'three' => 30,
+            'four'  => 40,
+            'five'  => 50,
+        ]);
+
+        $diff = $collection->diffKeys([
+            'two'   => 2,
+            'four'  => 4,
+            'six'   => 6,
+            'eight' => 8,
+        ]);
+
+        $diff->all();
+
+        $this->assertEquals(['one' => 10, 'three' => 30, 'five' => 50], $diff->all());
+    }
+
+    /** @test */
+    function can_retrieve_and_return_duplicate_values_from_collection()
+    {
+        $collection = collect(['a', 'b', 'a', 'c', 'b']);
+
+        $this->assertEquals(['a', 'b'], $collection->duplicates());
+    }
+
+    /** @test */
+    function can_retrieve_and_return_duplicate_values_from_collection_on_associative_array()
+    {
+        $employees = collect([
+            ['email' => 'abigail@example.com', 'position' => 'Developer'],
+            ['email' => 'james@example.com', 'position' => 'Designer'],
+            ['email' => 'victoria@example.com', 'position' => 'Developer'],
+        ]);
+
+        $this->assertEquals(['Developer'], $employees->duplicates('position'));
+    }
+
+    /** @test */
+    function can_iterate_through_items_using_each_method()
+    {
+        $collection = collect([1, 2, 3, 4]);
+        $collection->each(function ($item, $key) {
+            return $item * 2;
+        });
+
+        $this->assertEquals([2, 4, 6, 8], $collection->all());
+    }
+
+    /** @test */
+    function each_should_stop_the_loop_when_false_returned()
+    {
+        $collection = collect([1, 2, 3, 4]);
+        $collection->each(function ($item, $key) {
+            if ($item > 2) return false;
+            return $item * 2;
+        });
+
+        $this->assertEquals([2, 4, 3, 4], $collection->all());
+    }
+
+    /** @test */
+    function eachSpread_can_iterate_over_collection_items_and_pass_nested_item_to_callback()
+    {
+        $collection = collect([['John Doe', 35], ['Jane Doe', 33]]);
+
+        $collection->eachSpread(function ($name, $age) {
+            return [$name, $age+1];
+        });
+
+        $this->assertEquals([['John Doe', 36], ['Jane Doe', 34]], $collection->all());
+    }
+
+    /** @test */
+    function can_return_from_eachSpread_by_returning_false()
+    {
+        $collection = collect([['John Doe', 35], ['Jane Doe', 33]]);
+
+        $collection->eachSpread(function ($name, $age) {
+            if($age == 33) return false;
+            return [$name, $age+1];
+        });
+
+        $this->assertEquals([['John Doe', 36], ['Jane Doe', 33]], $collection->all());
+    }
+
+
 }
