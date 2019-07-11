@@ -289,7 +289,7 @@ class CollectionTest extends TestCase
         $collection = collect([['John Doe', 35], ['Jane Doe', 33]]);
 
         $collection->eachSpread(function ($name, $age) {
-            return [$name, $age+1];
+            return [$name, $age + 1];
         });
 
         $this->assertEquals([['John Doe', 36], ['Jane Doe', 34]], $collection->all());
@@ -301,11 +301,116 @@ class CollectionTest extends TestCase
         $collection = collect([['John Doe', 35], ['Jane Doe', 33]]);
 
         $collection->eachSpread(function ($name, $age) {
-            if($age == 33) return false;
-            return [$name, $age+1];
+            if ($age == 33) return false;
+            return [$name, $age + 1];
         });
 
         $this->assertEquals([['John Doe', 36], ['Jane Doe', 33]], $collection->all());
+    }
+
+    /** @test */
+    function can_verify_all_elements_of_a_collection_pass_a_test()
+    {
+        $ans = collect([1, 2, 3, 4])->every(function ($value, $key) {
+            return $value > 2;
+        });
+        $this->assertFalse($ans);
+    }
+
+    /** @test */
+    function every_should_return_on_an_empty_collection()
+    {
+        $collection = collect([]);
+
+        $ans = $collection->every(function ($value, $key) {
+            return $value > 2;
+        });
+
+        $this->assertTrue($ans);
+    }
+
+    /** @test */
+    function can_return_all_items_in_collection_except_those_that_are_specified()
+    {
+        $collection = collect(['product_id' => 1, 'price' => 100, 'discount' => false]);
+
+        $filtered = $collection->except(['price', 'discount']);
+
+        $this->assertEquals(['product_id' => 1], $filtered->all());
+    }
+
+    /** @test */
+    function can_filter_a_collection_using_a_callback()
+    {
+        $collection = collect([1, 2, 3, 4]);
+
+        $filtered = $collection->filter(function ($value, $key) {
+            return $value > 2;
+        });
+
+        $this->assertEquals([3, 4], $filtered->all());
+    }
+
+    /** @test */
+    function filter_will_remove_falsy_values_in_case_no_callback_supplied()
+    {
+        $collection = collect([1, 2, 3, null, false, '', 0, []]);
+
+        $this->assertEquals([1, 2, 3], $collection->filter()->all());
+    }
+
+    /** @test */
+    function can_return_the_first_item_in_array_that_passes_a_test()
+    {
+        $ans = collect([1, 2, 3, 4])->first(function ($value, $key) {
+            return $value > 2;
+        });
+
+        $this->assertEquals(3, $ans);
+    }
+
+    /** @test */
+    function first_will_return_null_on_empty_collection()
+    {
+        $this->assertNull(collect([])->first(function ($value, $key) {
+            return $value > 2;
+        }));
+    }
+
+    /** @test */
+    function first_will_return_the_first_element_in_case_callback_is_empty()
+    {
+        $this->assertEquals(1, collect([1, 2, 3, 4])->first());
+    }
+
+    /** @test */
+    function can_filter_elements_in_collection_with_key_value_pair()
+    {
+        $collection = collect([
+            ['name' => 'Regena', 'age' => null],
+            ['name' => 'Linda', 'age' => 14],
+            ['name' => 'Diego', 'age' => 23],
+            ['name' => 'Linda', 'age' => 84],
+        ]);
+
+        $this->assertEquals(['name' => 'Linda', 'age' => 14], $collection->firstWhere('name', 'Linda'));
+        $this->assertEquals(['name' => 'Linda', 'age' => 84], $collection->firstWhere('age', '>', '83'));
+        $this->assertEquals(['name' => 'Linda', 'age' => 84], $collection->firstWhere('age', '>=', '84'));
+        $this->assertEquals(['name' => 'Linda', 'age' => 14], $collection->firstWhere('age', '<', '23'));
+        $this->assertEquals(['name' => 'Linda', 'age' => 14], $collection->firstWhere('age', '<=', '14'));
+    }
+
+    /** @test */
+    function when_only_one_parameter_is_given_to_firstWhere_should_return_first_item_where_its_key_is_truthy()
+    {
+        $collection = collect([
+            ['name' => 'Regena', 'age' => null],
+            ['name' => 'Linda', 'age' => 14],
+            ['name' => 'Diego', 'age' => 23],
+            ['name' => 'Linda', 'age' => 84],
+        ]);
+
+        $this->assertEquals(['name' => 'Linda', 'age' => 14], $collection->firstWhere('age'));
     }
 
 

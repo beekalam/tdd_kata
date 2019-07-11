@@ -194,13 +194,13 @@ class Collection
         $arr = [];
         $cancelled = false;
         foreach ($this->arr as $row) {
-            if($cancelled){
-                $arr[] =  $row;
-            }else{
-                if(call_user_func_array($callable, $row) === false){
+            if ($cancelled) {
+                $arr[] = $row;
+            } else {
+                if (call_user_func_array($callable, $row) === false) {
                     $cancelled = true;
                     $arr[] = $row;
-                }else{
+                } else {
                     $arr[] = call_user_func_array($callable, $row);
                 }
             }
@@ -208,6 +208,122 @@ class Collection
         $this->arr = $arr;
         return $this;
     }
+
+    public function every($callable)
+    {
+        foreach ($this->arr as $k => $v) {
+            if (!$callable($v, $k)) return false;
+        }
+        return true;
+    }
+
+    public function except($arr)
+    {
+        $ans = [];
+        foreach ($this->arr as $k => $v) {
+            if (!in_array($k, $arr)) {
+                $ans[$k] = $v;
+            }
+        }
+        return collect($ans);
+    }
+
+    public function filter($callable = null)
+    {
+        $ans = is_null($callable) ? $this->filterNotFalsy() : $this->filterWithCallback($callable);
+        return collect($ans);
+    }
+
+    /**
+     * @param array $ans
+     * @return array
+     */
+    private function filterNotFalsy()
+    {
+        $ans = [];
+        foreach ($this->arr as $k => $v) {
+            if ($this->isFalsy($v)) {
+                $ans[] = $v;
+            }
+        }
+        return $ans;
+    }
+
+    /**
+     * @param       $callable
+     * @return array
+     */
+    private function filterWithCallback($callable)
+    {
+        $ans = [];
+        foreach ($this->arr as $k => $v) {
+            if ($callable($v, $k)) {
+                $ans[] = $v;
+            }
+        }
+        return $ans;
+    }
+
+    private function isFalsy($v)
+    {
+        return (boolean)$v;
+    }
+
+    public function first($callable = null)
+    {
+        if (is_null($callable) && count($this->arr) > 0) {
+            return $this->arr[0];
+        } else {
+            foreach ($this->arr as $k => $v) {
+                if ($callable($v, $k)) return $v;
+            }
+        }
+        return null;
+    }
+
+    public function firstWhere()
+    {
+        if (func_num_args() == 2) {
+            $expected_key = func_get_arg(0);
+            $expected_value = func_get_arg(1);
+            $operator = '=';
+        } elseif (func_num_args() == 3) {
+            $expected_key = func_get_arg(0);
+            $operator = func_get_arg(1);
+            $expected_value = func_get_arg(2);
+        } else if (func_num_args() == 1) {
+            $expected_key = func_get_arg(0);
+            foreach ($this->arr as $row) {
+                if (isset($row[$expected_key]) && $row[$expected_key])
+                    return $row;
+            }
+            return null;
+        }
+        return $this->_firstWhere($expected_key, $operator, $expected_value);
+    }
+
+    private function _firstWhere($expected_key, $operator, $expected_value)
+    {
+        foreach ($this->arr as $row) {
+            if (isset($row[$expected_key])) {
+                if ($operator == '=' && $row[$expected_key] == $expected_value) {
+                    return $row;
+                } else if ($operator == '>' && $row[$expected_key] > $expected_value) {
+                    return $row;
+                } elseif ($operator == '>=' && $row[$expected_key] >= $expected_value) {
+                    return $row;
+                } elseif ($operator == '<' && $row[$expected_key] < $expected_value) {
+                    return $row;
+                } elseif ($operator == '<=' && $row[$expected_key] <= $expected_value) {
+                    return $row;
+                }
+            }
+        }
+
+        return null;
+    }
+
+
 
     // private function getClosureParameters($closure)
     // {
@@ -267,6 +383,7 @@ class Collection
         }
         return false;
     }
+
 
 }
 
