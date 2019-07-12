@@ -49,9 +49,18 @@ class CollectionTest extends TestCase
 
         $collapsed = $collection->collapse();
 
-        $collapsed->all();
-
         $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9], $collapsed->all());
+    }
+
+    /** @test */
+    function can_collapse_array_of_arrays_with_key_values_to_a_flat_array()
+    {
+        $collection = collect([
+            ['name' => 'Sally', 'job' => 'developer'],
+            ['school' => 'Arkansas'],
+            ['age' => 28]
+        ])->collapse();
+        $this->assertEquals(["name" => "Sally", "job" => "developer", "school" => "Arkansas", "age" => 28], $collection->all());
     }
 
     /** @test */
@@ -413,5 +422,55 @@ class CollectionTest extends TestCase
         $this->assertEquals(['name' => 'Linda', 'age' => 14], $collection->firstWhere('age'));
     }
 
+    /** @test */
+    function can_form_new_collection_using_mapping()
+    {
+        $collection = collect([
+            ['name' => 'Sally'],
+            ['school' => 'Arkansas'],
+            ['age' => 28]
+        ]);
+
+        $flattened = $collection->flatMap(function ($values) {
+            return array_map('strtoupper', $values);
+        });
+
+        $this->assertEquals(['name' => 'SALLY', 'school' => 'ARKANSAS', 'age' => '28'], $flattened->all());
+    }
+
+    /** @test */
+    function can_flatten_an_array()
+    {
+        $collection = collect(['name' => 'taylor', 'languages' => ['php', 'javascript']]);
+
+        $flattened = $collection->flatten();
+
+        $this->assertEquals(['taylor', 'php', 'javascript'], $flattened->all());
+    }
+
+
+    /** @test */
+    function can_swap_collection_keys_with_values()
+    {
+        $collection = collect(['name' => 'taylor', 'framework' => 'laravel']);
+
+        $this->assertEquals(['taylor' => 'name', 'laravel' => 'framework'], $collection->flip()->all());
+    }
+
+    /** @test */
+    function can_remove_an_item_from_collection()
+    {
+        $collection = collect(['name' => 'taylor', 'framework' => 'laravel']);
+
+        $this->assertEquals(['framework' => 'laravel'], $collection->forget('name')->all());
+    }
+
+    /** @test */
+    function can_paginate_collection_and_return_the_page_content_based_on_page_number()
+    {
+        $collection = collect([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+        $this->assertEquals([4, 5, 6], $collection->forPage(2, 3)->all());
+    }
 
 }

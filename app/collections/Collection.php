@@ -284,13 +284,9 @@ class Collection
     public function firstWhere()
     {
         if (func_num_args() == 2) {
-            $expected_key = func_get_arg(0);
-            $expected_value = func_get_arg(1);
-            $operator = '=';
+            return $this->_firstWhere(func_get_arg(0), '=', func_get_arg(1));
         } elseif (func_num_args() == 3) {
-            $expected_key = func_get_arg(0);
-            $operator = func_get_arg(1);
-            $expected_value = func_get_arg(2);
+            return $this->_firstWhere(func_get_arg(0), func_get_arg(1), func_get_arg(2));
         } else if (func_num_args() == 1) {
             $expected_key = func_get_arg(0);
             foreach ($this->arr as $row) {
@@ -299,7 +295,7 @@ class Collection
             }
             return null;
         }
-        return $this->_firstWhere($expected_key, $operator, $expected_value);
+        return null;
     }
 
     private function _firstWhere($expected_key, $operator, $expected_value)
@@ -323,7 +319,45 @@ class Collection
         return null;
     }
 
+    public function flatMap($callable)
+    {
+        $keys = array_keys($this->arr);
+        $items = array_map($callable, $this->arr, $keys);
+        $ans = array_combine($keys, $items);
+        return collect(collect($ans)->collapse()->all());
+    }
 
+    public function flatten()
+    {
+        $ans = flattenArray($this->arr);
+        return collect(array_values($ans));
+    }
+
+    public function flip()
+    {
+        return collect(array_flip($this->arr));
+    }
+
+    public function forget($key)
+    {
+        $ans = [];
+        foreach ($this->arr as $k => $v) {
+            if ($key !== $k) {
+                $ans[$k] = $v;
+            }
+        }
+        return collect($ans);
+    }
+
+    public function forPage($page, $size)
+    {
+        $index = ($page - 1) * $size;
+        if ($index + $size < count($this->arr)) {
+            return collect(array_splice($this->arr, $index, $size));
+        } else {
+            return collect([]);
+        }
+    }
 
     // private function getClosureParameters($closure)
     // {
