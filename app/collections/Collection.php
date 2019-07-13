@@ -359,6 +359,56 @@ class Collection
         }
     }
 
+    public function get($key, $default = null)
+    {
+        if (!isset($this->arr[$key])) {
+            return is_callable($default) ? $default() : $default;
+        }
+        return $this->arr[$key];
+    }
+
+    // public function groupBy($toIndex)
+    // {
+    //     if (func_num_args() == 1) {
+    //         if (is_callable($toIndex)) {
+    //             return $this->_groupByCallback($toIndex);
+    //         } else {
+    //             return $this->_groupBy(array_unique(array_column($this->arr, $toIndex)), $toIndex);
+    //         }
+    //     } elseif (func_num_args() == 2) {
+    //         $criterias = func_get_arg(0);
+    //         return $this->_multipleGroupBy($criterias[0], $criterias[1], func_get_arg(1));
+    //     }
+    // }
+    //
+    // private function _groupBy($keys, $toIndex)
+    // {
+    //     $ans = [];
+    //     foreach ($keys as $key) {
+    //         foreach ($this->arr as $row) {
+    //             if (isset($row[$toIndex]) && $row[$toIndex] == $key) $ans[$key][] = $row;
+    //         }
+    //     }
+    //     return collect($ans);
+    // }
+    //
+    // private function _groupByCallback($callback)
+    // {
+    //     $ans = [];
+    //     foreach ($this->arr as $k => $row) {
+    //         $toIndex = $callback($row, $k);
+    //         $ans[$toIndex][] = $row;
+    //     }
+    //     return collect($ans);
+    // }
+    //
+    // private function _multipleGroupBy($toIndex, $callback, $preserveKeys = true)
+    // {
+    //     var_dump($toIndex);
+    //     $groupedByIndex = $this->_groupBy(array_unique(array_column($this->arr, $toIndex)), $toIndex);
+    //     print_r($groupedByIndex->toArray());
+    // }
+
     // private function getClosureParameters($closure)
     // {
     //     $arguments = (new \ReflectionFunction($closure))->getParameters();

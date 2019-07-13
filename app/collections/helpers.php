@@ -20,11 +20,16 @@ function isAssociative($array)
 
 function flattenArray($arr, &$ans = [])
 {
-    foreach ($arr as $row) {
+    $isAssociative = isAssociative($arr);
+    foreach ($arr as $k => $row) {
         if (is_array($row)) {
             flattenArray($row, $ans);
         } else {
-            $ans[] = $row;
+            if ($isAssociative) {
+                $ans[$k] = $row;
+            } else {
+                $ans[] = $row;
+            }
         }
     }
     return $ans;

@@ -473,4 +473,124 @@ class CollectionTest extends TestCase
         $this->assertEquals([4, 5, 6], $collection->forPage(2, 3)->all());
     }
 
+    /** @test */
+    function can_get_item_value_by_key()
+    {
+        $collection = collect(['name' => 'taylor', 'framework' => 'laravel']);
+
+        $this->assertEquals('taylor', $collection->get('name'));
+        $this->assertNull($collection->get('doesntexist'));
+    }
+
+    /** @test */
+    function get_can_return_a_default_value()
+    {
+        $collection = collect(['name' => 'taylor', 'framework' => 'laravel']);
+
+        $this->assertEquals('default-value', $collection->get('foo', 'default-value'));
+    }
+
+    /** @test */
+    function get_can_accept_a_callback()
+    {
+        $collection = collect([]);
+        $res = $collection->get('email', function () {
+            return 'default-value';
+        });
+
+        $this->assertEquals('default-value', $res);
+    }
+
+    // /** @test */
+    // function can_group_collection_items_by_a_given_key()
+    // {
+    //     $collection = collect([
+    //         ['account_id' => 'account-x10', 'product' => 'Chair'],
+    //         ['account_id' => 'account-x10', 'product' => 'Bookcase'],
+    //         ['account_id' => 'account-x11', 'product' => 'Desk'],
+    //     ]);
+    //
+    //     $expected = [
+    //         'account-x10' => [
+    //             ['account_id' => 'account-x10', 'product' => 'Chair'],
+    //             ['account_id' => 'account-x10', 'product' => 'Bookcase'],
+    //         ],
+    //         'account-x11' => [
+    //             ['account_id' => 'account-x11', 'product' => 'Desk'],
+    //         ],
+    //     ];
+    //
+    //     $this->assertEquals($expected, $collection->groupBy('account_id')->toArray());
+    // }
+    //
+    // /** @test */
+    // function groupBy_can_accept_a_callback_instead_of_key()
+    // {
+    //     $collection = collect([
+    //         ['account_id' => 'account-x10', 'product' => 'Chair'],
+    //         ['account_id' => 'account-x10', 'product' => 'Bookcase'],
+    //         ['account_id' => 'account-x11', 'product' => 'Desk'],
+    //     ]);
+    //
+    //     $grouped = $collection->groupBy(function ($item, $key) {
+    //         return substr($item['account_id'], -3);
+    //     });
+    //
+    //     $expected =
+    //         [
+    //             'x10' => [
+    //                 ['account_id' => 'account-x10', 'product' => 'Chair'],
+    //                 ['account_id' => 'account-x10', 'product' => 'Bookcase'],
+    //             ],
+    //             'x11' => [
+    //                 ['account_id' => 'account-x11', 'product' => 'Desk'],
+    //             ],
+    //         ];
+    //     $this->assertEquals($expected, $grouped->toArray());
+    // }
+    //
+    // /** @test */
+    // function groupBy_can_accept_multiple_grouping_criteria()
+    // {
+    //     $data = collect([
+    //         10 => ['user' => 1, 'skill' => 1, 'roles' => ['Role_1', 'Role_3']],
+    //         20 => ['user' => 2, 'skill' => 1, 'roles' => ['Role_1', 'Role_2']],
+    //         30 => ['user' => 3, 'skill' => 2, 'roles' => ['Role_1']],
+    //         40 => ['user' => 4, 'skill' => 2, 'roles' => ['Role_2']],
+    //     ]);
+    //
+    //     $result = $data->groupBy([
+    //         'skill',
+    //         function ($item) {
+    //             return $item['roles'];
+    //         },
+    //     ], $preserveKeys = true);
+    //
+    //     $expected = [
+    //         1 => [
+    //             'Role_1' => [
+    //                 10 => ['user' => 1, 'skill' => 1, 'roles' => ['Role_1', 'Role_3']],
+    //                 20 => ['user' => 2, 'skill' => 1, 'roles' => ['Role_1', 'Role_2']],
+    //             ],
+    //             'Role_2' => [
+    //                 20 => ['user' => 2, 'skill' => 1, 'roles' => ['Role_1', 'Role_2']],
+    //             ],
+    //             'Role_3' => [
+    //                 10 => ['user' => 1, 'skill' => 1, 'roles' => ['Role_1', 'Role_3']],
+    //             ],
+    //         ],
+    //         2 => [
+    //             'Role_1' => [
+    //                 30 => ['user' => 3, 'skill' => 2, 'roles' => ['Role_1']],
+    //             ],
+    //             'Role_2' => [
+    //                 40 => ['user' => 4, 'skill' => 2, 'roles' => ['Role_2']],
+    //             ],
+    //         ],
+    //     ];
+    //
+    //     $this->assertEquals($expected, $result);
+    //
+    // }
+
 }
