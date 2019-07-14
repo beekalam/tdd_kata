@@ -367,47 +367,78 @@ class Collection
         return $this->arr[$key];
     }
 
-    // public function groupBy($toIndex)
-    // {
-    //     if (func_num_args() == 1) {
-    //         if (is_callable($toIndex)) {
-    //             return $this->_groupByCallback($toIndex);
-    //         } else {
-    //             return $this->_groupBy(array_unique(array_column($this->arr, $toIndex)), $toIndex);
-    //         }
-    //     } elseif (func_num_args() == 2) {
-    //         $criterias = func_get_arg(0);
-    //         return $this->_multipleGroupBy($criterias[0], $criterias[1], func_get_arg(1));
-    //     }
-    // }
-    //
-    // private function _groupBy($keys, $toIndex)
-    // {
-    //     $ans = [];
-    //     foreach ($keys as $key) {
-    //         foreach ($this->arr as $row) {
-    //             if (isset($row[$toIndex]) && $row[$toIndex] == $key) $ans[$key][] = $row;
-    //         }
-    //     }
-    //     return collect($ans);
-    // }
-    //
-    // private function _groupByCallback($callback)
-    // {
-    //     $ans = [];
-    //     foreach ($this->arr as $k => $row) {
-    //         $toIndex = $callback($row, $k);
-    //         $ans[$toIndex][] = $row;
-    //     }
-    //     return collect($ans);
-    // }
-    //
-    // private function _multipleGroupBy($toIndex, $callback, $preserveKeys = true)
-    // {
-    //     var_dump($toIndex);
-    //     $groupedByIndex = $this->_groupBy(array_unique(array_column($this->arr, $toIndex)), $toIndex);
-    //     print_r($groupedByIndex->toArray());
-    // }
+    public function groupBy($toIndex)
+    {
+        if (func_num_args() == 1) {
+            if (is_callable($toIndex)) {
+                return $this->_groupByCallback($toIndex);
+            } else {
+                return $this->_groupBy(array_unique(array_column($this->arr, $toIndex)), $toIndex);
+            }
+        } elseif (func_num_args() == 2) {
+            $criterias = func_get_arg(0);
+            return $this->_multipleGroupBy($criterias[0], $criterias[1], func_get_arg(1));
+        }
+    }
+
+    private function _groupBy($keys, $toIndex)
+    {
+        $ans = [];
+        foreach ($keys as $key) {
+            foreach ($this->arr as $row) {
+                if (isset($row[$toIndex]) && $row[$toIndex] == $key) $ans[$key][] = $row;
+            }
+        }
+        return collect($ans);
+    }
+
+    public function _groupByCallback($callback,  $preserveKeys = false)
+    {
+        $ans = [];
+        foreach ($this->arr as $k => $row) {
+            $toIndex = $callback($row, $k);
+            if (is_array($toIndex)) {
+                foreach ($toIndex as $key => $value) {
+                    if ($preserveKeys  && isset($row['__key__'])) {
+                        $__key__ = $row['__key__'];
+                        $ans[$value][$__key__] = $row;
+                    } else {
+                        $ans[$value][] = $row;
+                    }
+                }
+            } else {
+                $ans[$toIndex][] = $row;
+            }
+
+        }
+        return collect($ans);
+    }
+
+    private function _multipleGroupBy($toIndex, $callback, $preserveKeys = true)
+    {
+        foreach($this->arr as $k => &$v){
+            $v['__key__'] = $k;
+        }
+        $groupedByIndex = $this->_groupBy(array_unique(array_column($this->arr, $toIndex)), $toIndex)->toArray();
+        $ans = [];
+        foreach ($groupedByIndex as $k => $v) {
+            $ans[] = collect($v)->_groupByCallback($callback, true)->toArray();
+        }
+        $this->arrayRemoveKey($ans, '__key__');
+        return collect($ans);
+    }
+
+    private function arrayRemoveKey(&$arr,$key)
+    {
+        foreach($arr as $k => &$v){
+            if(is_array($v)){
+               $this->arrayRemoveKey($v,$key);
+            }
+            if($k == $key && isset($arr[$key])){
+                unset($arr[$key]);
+            }
+        }
+    }
 
     // private function getClosureParameters($closure)
     // {
