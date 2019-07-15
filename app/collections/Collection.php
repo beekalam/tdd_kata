@@ -392,14 +392,14 @@ class Collection
         return collect($ans);
     }
 
-    public function _groupByCallback($callback,  $preserveKeys = false)
+    public function _groupByCallback($callback, $preserveKeys = false)
     {
         $ans = [];
         foreach ($this->arr as $k => $row) {
             $toIndex = $callback($row, $k);
             if (is_array($toIndex)) {
                 foreach ($toIndex as $key => $value) {
-                    if ($preserveKeys  && isset($row['__key__'])) {
+                    if ($preserveKeys && isset($row['__key__'])) {
                         $__key__ = $row['__key__'];
                         $ans[$value][$__key__] = $row;
                     } else {
@@ -416,7 +416,7 @@ class Collection
 
     private function _multipleGroupBy($toIndex, $callback, $preserveKeys = true)
     {
-        foreach($this->arr as $k => &$v){
+        foreach ($this->arr as $k => &$v) {
             $v['__key__'] = $k;
         }
         $groupedByIndex = $this->_groupBy(array_unique(array_column($this->arr, $toIndex)), $toIndex)->toArray();
@@ -428,16 +428,105 @@ class Collection
         return collect($ans);
     }
 
-    private function arrayRemoveKey(&$arr,$key)
+    private function arrayRemoveKey(&$arr, $key)
     {
-        foreach($arr as $k => &$v){
-            if(is_array($v)){
-               $this->arrayRemoveKey($v,$key);
+        foreach ($arr as $k => &$v) {
+            if (is_array($v)) {
+                $this->arrayRemoveKey($v, $key);
             }
-            if($k == $key && isset($arr[$key])){
+            if ($k == $key && isset($arr[$key])) {
                 unset($arr[$key]);
             }
         }
+    }
+
+    public function has($args)
+    {
+        if (is_array($args)) {
+            return $this->_hasKeyInArray($args);
+        } else {
+            return $this->_has($args);
+        }
+    }
+
+    private function _has($key)
+    {
+        return array_key_exists($key, $this->arr);
+    }
+
+    /**
+     * @param $args
+     * @return bool
+     */
+    private function _hasKeyInArray($args)
+    {
+        foreach ($args as $key) {
+            if (!$this->_has($key))
+                return false;
+        }
+        return true;
+    }
+
+    public function implode()
+    {
+        if (func_num_args() == 1) {
+            $glue = func_get_arg(0);
+            return implode($glue, $this->arr);
+        } elseif (func_num_args() == 2) {
+            $key = func_get_arg(0);
+            $glue = func_get_arg(1);
+            return implode($glue, array_column($this->arr, $key));
+        }
+    }
+
+    public function intersect($arr)
+    {
+        $ans = array_intersect($this->arr, $arr);
+        return collect($ans);
+    }
+
+    public function intersectByKeys($arr)
+    {
+        $ans = array_intersect_key($this->arr, $arr);
+        return collect($ans);
+    }
+
+    public function isEmpty()
+    {
+        return empty($this->arr);
+    }
+
+    public function isNotEmpty()
+    {
+        return !empty($this->arr);
+    }
+
+    public function join($glue, $glue2 = null)
+    {
+        return is_null($glue2) ? implode($glue,$this->arr) : $this->_join($glue,$glue2);
+    }
+
+    /**
+     * @param $glue
+     * @param $glue2
+     * @return string
+     */
+    private function _join($glue, $glue2)
+    {
+        $len = count($this->arr);
+        if ($len == 1) return $this->arr[0];
+
+        $ret = '';
+        for ($i = 0; $i < $len; $i++) {
+            if ($i == $len - 1) {
+                $ret .= $glue2 . $this->arr[$i];
+            } elseif ($i == $len - 2) {
+                $ret .= $this->arr[$i];
+            } else {
+                $ret .= $this->arr[$i] . $glue;
+            }
+        }
+        return $ret;
     }
 
     // private function getClosureParameters($closure)

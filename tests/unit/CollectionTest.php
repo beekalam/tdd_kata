@@ -588,7 +588,79 @@ class CollectionTest extends TestCase
                 ],
             ],
         ];
-       $this->assertEquals($expected,$result->toArray());
+        $this->assertEquals($expected, $result->toArray());
+    }
+
+    /** @test */
+    function can_determine_if_a_given_key_exist_in_collection()
+    {
+        $collection = collect(['account_id' => 1, 'product' => 'Desk', 'amount' => 5]);
+
+        $this->assertTrue($collection->has('product'));
+    }
+
+    /** @test */
+    function can_determine_if_multiple_keys_exist_in_collection()
+    {
+        $collection = collect(['account_id' => 1, 'product' => 'Desk', 'amount' => 5]);
+
+        $this->assertTrue($collection->has(['product', 'amount']));
+    }
+
+    /** @test */
+    function can_join_items_in_collection()
+    {
+        $this->assertEquals('1-2-3-4-5', collect([1, 2, 3, 4, 5])->implode('-'));
+    }
+
+    /** @test */
+    function can_join_items_in_an_associative_collection()
+    {
+        $collection = collect([
+            ['account_id' => 1, 'product' => 'Desk'],
+            ['account_id' => 2, 'product' => 'Chair'],
+        ]);
+
+        $this->assertEquals('Desk, Chair', $collection->implode('product', ', '));
+    }
+
+    /** @test */
+    function can_intersect_collection_values_by_input_array()
+    {
+        $collection = collect(['Desk', 'Sofa', 'Chair']);
+
+        $this->assertEquals([0 => 'Desk', 2 => 'Chair'], $collection->intersect(['Desk', 'Chair', 'Bookcase'])->all());
+    }
+
+    /** @test */
+    function can_intersect_collection_values_by_keys()
+    {
+        $collection = collect([
+            'serial' => 'UX301', 'type' => 'screen', 'year' => 2009
+        ]);
+
+        $intersect = $collection->intersectByKeys([
+            'reference' => 'UX404', 'type' => 'tab', 'year' => 2011
+        ]);
+
+        $this->assertEquals(['type' => 'screen', 'year' => 2009], $intersect->all());
+    }
+
+    /** @test */
+    function can_determine_if_collections_is_empty()
+    {
+        $this->assertTrue(collect([])->isEmpty());
+        $this->assertFalse(collect([])->isNotEmpty());
+    }
+
+    /** @test */
+    function can_join_collection_values_with_string()
+    {
+        $this->assertEquals('a, b, c', collect(['a', 'b', 'c'])->join(', '));
+        $this->assertEquals('a, b, and c', collect(['a', 'b', 'c'])->join(', ', ', and '));
+        $this->assertEquals('a and b', collect(['a', 'b'])->join(', ', ' and '));
+        $this->assertEquals('a', collect(['a'])->join(', ', ' and '));
+        $this->assertEquals('', collect([])->join(', ', ' and '));
     }
 
 
