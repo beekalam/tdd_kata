@@ -663,5 +663,82 @@ class CollectionTest extends TestCase
         $this->assertEquals('', collect([])->join(', ', ' and '));
     }
 
+    /** @test */
+    function can_key_the_collection_by_a_given_key()
+    {
+        $collection = collect([
+            ['product_id' => 'prod-100', 'name' => 'Desk'],
+            ['product_id' => 'prod-200', 'name' => 'Chair'],
+        ]);
+
+        $expected = [
+            'prod-100' => ['product_id' => 'prod-100', 'name' => 'Desk'],
+            'prod-200' => ['product_id' => 'prod-200', 'name' => 'Chair'],
+        ];
+
+        $this->assertEquals($expected, $collection->keyBy('product_id')->all());
+    }
+
+    /** @test */
+    function keyBy_may_accept_a_callback_as_argument()
+    {
+        $collection = collect([
+            ['product_id' => 'prod-100', 'name' => 'Desk'],
+            ['product_id' => 'prod-200', 'name' => 'Chair'],
+        ]);
+
+        $keyed = $collection->keyBy(function ($item) {
+            return strtoupper($item['product_id']);
+        });
+
+        $keyed->all();
+
+        $expected = [
+            'PROD-100' => ['product_id' => 'prod-100', 'name' => 'Desk'],
+            'PROD-200' => ['product_id' => 'prod-200', 'name' => 'Chair'],
+        ];
+
+        $this->assertEquals($expected, $keyed->all());
+    }
+
+    /** @test */
+    function can_return_all_collections_keys()
+    {
+        $collection = collect([
+            'prod-100' => ['product_id' => 'prod-100', 'name' => 'Desk'],
+            'prod-200' => ['product_id' => 'prod-200', 'name' => 'Chair'],
+        ]);
+
+        $this->assertEquals(['prod-100', 'prod-200'], $collection->keys()->all());
+    }
+
+    /** @test */
+    function can_return_the_last_element_in_collection_that_passes_a_truth_test()
+    {
+        $ans = collect([1, 2, 3, 4])->last(function ($value, $key) {
+            return $value < 3;
+        });
+
+        $this->assertEquals(2, $ans);
+    }
+
+    /** @test */
+    function last_may_accept_empty_argument()
+    {
+        $this->assertEquals(4, collect([1, 2, 3, 4])->last());
+    }
+
+    /** @test */
+    function can_map_collection_items()
+    {
+        $collection = collect([1, 2, 3, 4, 5]);
+
+        $multiplied = $collection->map(function ($item, $key) {
+            return $item * 2;
+        });
+
+        $this->assertEquals([2, 4, 6, 8, 10], $multiplied->all());
+    }
+
 
 }

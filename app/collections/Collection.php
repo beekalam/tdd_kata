@@ -503,7 +503,7 @@ class Collection
 
     public function join($glue, $glue2 = null)
     {
-        return is_null($glue2) ? implode($glue,$this->arr) : $this->_join($glue,$glue2);
+        return is_null($glue2) ? implode($glue, $this->arr) : $this->_join($glue, $glue2);
     }
 
     /**
@@ -528,6 +528,63 @@ class Collection
         }
         return $ret;
     }
+
+    public function keyBy($key)
+    {
+        return is_callable($key) ? $this->keyByCallback($key) : $this->_keyBy($key);
+    }
+
+    public function keyByCallback($callback)
+    {
+        $ans = [];
+        foreach ($this->arr as $row) {
+            $computed_key = $callback($row);
+            $ans[$computed_key] = $row;
+        }
+        return collect($ans);
+    }
+
+    private function _keyBy($key)
+    {
+        $ans = [];
+        foreach ($this->arr as $row) {
+            if (isset($row[$key])) {
+                $ans[$row[$key]] = $row;
+            }
+        }
+        return collect($ans);
+    }
+
+    public function keys()
+    {
+        return collect(array_keys($this->arr));
+    }
+
+
+    public function last($callable = null)
+    {
+        if (is_null($callable)) {
+            return end($this->arr);
+        }
+
+        $ans = null;
+        foreach ($this->arr as $k => $v) {
+            if ($callable($v, $k) === true) {
+                $ans = $v;
+            }
+        }
+        return $ans;
+    }
+
+    public function map($callable)
+    {
+        $ans = [];
+        foreach ($this->arr as $k => $v) {
+            $ans[] = $callable($v, $k);
+        }
+        return collect($ans);
+    }
+
 
     // private function getClosureParameters($closure)
     // {
