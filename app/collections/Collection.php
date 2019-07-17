@@ -585,6 +585,88 @@ class Collection
         return collect($ans);
     }
 
+    public function mapSpread($callable)
+    {
+        $ans = [];
+        foreach ($this->arr as $row) {
+            $ans[] = call_user_func_array($callable, $row);
+        }
+        return collect($ans);
+    }
+
+    public function mapToGroups($callable)
+    {
+        $ans = [];
+        foreach ($this->arr as $k => $row) {
+            foreach ($callable($row, $k) as $key => $value) {
+                $ans[$key][] = $value;
+            }
+        }
+        return collect($ans);
+    }
+
+    public function mapWithKeys($callable)
+    {
+        $ans = [];
+        foreach ($this->arr as $k => $row) {
+            foreach ($callable($row, $k) as $key => $value) {
+                $ans[$key] = $value;
+            }
+        }
+        return collect($ans);
+    }
+
+    public function max($key = null)
+    {
+        return is_null($key) ? max($this->arr) : max(array_column($this->arr, $key));
+    }
+
+    public function median($key = null)
+    {
+        return is_null($key) ? $this->_median($this->arr) : $this->_median(array_column($this->arr, $key));
+    }
+
+    private function _median($arr)
+    {
+        $len = count($arr);
+        return count($arr) % 2 == 1 ? $arr[$len / 2] : ($arr[$len / 2] + $arr[($len / 2 - 1)]) / 2.0;
+    }
+
+    public function merge($arr)
+    {
+        return collect(array_merge($this->arr, $arr));
+    }
+
+    public function mergeRecursive($arr)
+    {
+        foreach($arr as $k => $v){
+            if(isset($this->arr[$k])){
+                $this->arr[$k] = [$this->arr[$k], $v];
+            }else{
+                $this->arr[$k] = $v;
+            }
+        }
+        return collect($this->arr);
+    }
+
+    public function min($key = null)
+    {
+        return is_null($key) ? min($this->arr) : min(array_column($this->arr, $key));
+    }
+
+    public function mode($key = null)
+    {
+       return is_null($key) ? $this->_mode($this->arr) : $this->_mode(array_column($this->arr,$key));
+    }
+
+    private function _mode($arr)
+    {
+       $arr = array_count_values($arr);
+       asort($arr,SORT_NUMERIC);
+       $arr = array_flip($arr);
+       return end($arr);
+    }
+
 
     // private function getClosureParameters($closure)
     // {

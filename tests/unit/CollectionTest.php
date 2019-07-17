@@ -740,5 +740,139 @@ class CollectionTest extends TestCase
         $this->assertEquals([2, 4, 6, 8, 10], $multiplied->all());
     }
 
+    /** @test */
+    function can_pass_collections_nested_items_to_a_callback()
+    {
+        $collection = collect([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+        $chunks = $collection->chunk(2);
+
+        $sequence = $chunks->mapSpread(function ($even, $odd) {
+            return $even + $odd;
+        });
+
+        $this->assertEquals([1, 5, 9, 13, 17], $sequence->all());
+    }
+
+    /** @test */
+    function can_group_collection_items_by_a_given_callback()
+    {
+        $collection = collect([
+            [
+                'name'       => 'John Doe',
+                'department' => 'Sales',
+            ],
+            [
+                'name'       => 'Jane Doe',
+                'department' => 'Sales',
+            ],
+            [
+                'name'       => 'Johnny Doe',
+                'department' => 'Marketing',
+            ]
+        ]);
+
+        $grouped = $collection->mapToGroups(function ($item, $key) {
+            return [$item['department'] => $item['name']];
+        });
+
+        $expected = [
+            'Sales'     => ['John Doe', 'Jane Doe'],
+            'Marketing' => ['Johnny Doe'],
+        ];
+        $this->assertEquals($expected, $grouped->toArray());
+    }
+
+    /** @test */
+    function can_map_collection_items2()
+    {
+        $collection = collect([
+            [
+                'name'       => 'John',
+                'department' => 'Sales',
+                'email'      => 'john@example.com'
+            ],
+            [
+                'name'       => 'Jane',
+                'department' => 'Marketing',
+                'email'      => 'jane@example.com'
+            ]
+        ]);
+
+        $keyed = $collection->mapWithKeys(function ($item) {
+            return [$item['email'] => $item['name']];
+        });
+
+        $expected = [
+            'john@example.com' => 'John',
+            'jane@example.com' => 'Jane',
+        ];
+
+        $this->assertEquals($expected, $keyed->all());
+    }
+
+    /** @test */
+    function can_calculate_max_value_of_a_collection()
+    {
+        $this->assertEquals(20, collect([['foo' => 10], ['foo' => 20]])->max('foo'));
+        $this->assertEquals(5, collect([1, 2, 3, 4, 5])->max());
+    }
+
+    /** @test */
+    function can_calculate_median_of_a_collection()
+    {
+        $this->assertEquals(6, collect([1, 3, 3, 6, 7, 8, 9])->median());
+
+        $median = collect([['foo' => 10], ['foo' => 10], ['foo' => 20], ['foo' => 40]])->median('foo');
+        $this->assertEquals(15, $median);
+
+        $median = collect([1, 1, 2, 4])->median();
+        $this->assertEquals(1.5, $median);
+    }
+
+    /** @test */
+    function can_merge_collection_values_with_an_array()
+    {
+        $this->assertEquals([1, 2, 3, 4], collect([1, 2, 3])->merge([4])->all());
+
+        $collection = collect(['product_id' => 1, 'price' => 100]);
+        $merged = $collection->merge(['price' => 200, 'discount' => false]);
+        $this->assertEquals(['product_id' => 1, 'price' => 200, 'discount' => false], $merged->all());
+
+        $collection = collect(['Desk', 'Chair']);
+        $merged = $collection->merge(['Bookcase', 'Door']);
+        $this->assertEquals(['Desk', 'Chair', 'Bookcase', 'Door'], $merged->all());
+    }
+
+    /** @test */
+    function can_merge_collection_values_recursively_with_an_input_array()
+    {
+        $collection = collect(['product_id' => 1, 'price' => 100]);
+
+        $merged = $collection->mergeRecursive(['product_id' => 2, 'price' => 200, 'discount' => false]);
+
+        $this->assertEquals(['product_id' => [1, 2], 'price' => [100, 200], 'discount' => false], $merged->all());
+    }
+
+    /** @test */
+    function can_return_the_minimum_value_of_collection()
+    {
+        $min = collect([['foo' => 10], ['foo' => 20]])->min('foo');
+        $this->assertEquals(10, $min);
+
+        $min = collect([1, 2, 3, 4, 5])->min();
+        $this->assertEquals(1, $min);
+    }
+
+    /** @test */
+    function can_calculate_mode_value_of_collection()
+    {
+        $mode = collect([['foo' => 10], ['foo' => 10], ['foo' => 20], ['foo' => 40]])->mode('foo');
+        $this->assertEquals(10,$mode);
+
+        $mode = collect([1, 1, 2, 4])->mode();
+        $this->assertEquals(1,$mode);
+    }
+
 
 }
