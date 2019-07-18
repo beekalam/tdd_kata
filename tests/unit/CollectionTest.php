@@ -868,10 +868,43 @@ class CollectionTest extends TestCase
     function can_calculate_mode_value_of_collection()
     {
         $mode = collect([['foo' => 10], ['foo' => 10], ['foo' => 20], ['foo' => 40]])->mode('foo');
-        $this->assertEquals(10,$mode);
+        $this->assertEquals(10, $mode);
 
         $mode = collect([1, 1, 2, 4])->mode();
-        $this->assertEquals(1,$mode);
+        $this->assertEquals(1, $mode);
+    }
+
+    /** @test */
+    function can_extract_every_nth_element_from_collection()
+    {
+        $collection = collect(['a', 'b', 'c', 'd', 'e', 'f']);
+
+        $this->assertEquals(['a', 'e'], $collection->nth(4));
+    }
+
+    /** @test */
+    function nth_may_optionally_accept_an_offset_argument()
+    {
+        $collection = collect(['a', 'b', 'c', 'd', 'e', 'f']);
+        $this->assertEquals(['b', 'f'], $collection->nth(4, 1));
+    }
+
+    /** @test */
+    function can_return_items_in_collection_with_specified_keys()
+    {
+        $collection = collect(['product_id' => 1, 'name' => 'Desk', 'price' => 100, 'discount' => false]);
+
+        $this->assertEquals(['product_id' => 1, 'name' => 'Desk'], $collection->only(['product_id', 'name']));
+    }
+
+    /** @test */
+    function can_pad_collection_items()
+    {
+        $collection = collect(['A', 'B', 'C']);
+
+        $this->assertEquals(['A', 'B', 'C', 0, 0], $collection->pad(5, 0)->all());
+
+        $this->assertEquals([0, 0, 'A', 'B', 'C'],$collection->pad(-5,0)->all());
     }
 
 

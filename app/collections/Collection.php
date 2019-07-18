@@ -639,10 +639,10 @@ class Collection
 
     public function mergeRecursive($arr)
     {
-        foreach($arr as $k => $v){
-            if(isset($this->arr[$k])){
+        foreach ($arr as $k => $v) {
+            if (isset($this->arr[$k])) {
                 $this->arr[$k] = [$this->arr[$k], $v];
-            }else{
+            } else {
                 $this->arr[$k] = $v;
             }
         }
@@ -656,16 +656,49 @@ class Collection
 
     public function mode($key = null)
     {
-       return is_null($key) ? $this->_mode($this->arr) : $this->_mode(array_column($this->arr,$key));
+        return is_null($key) ? $this->_mode($this->arr) : $this->_mode(array_column($this->arr, $key));
     }
 
     private function _mode($arr)
     {
-       $arr = array_count_values($arr);
-       asort($arr,SORT_NUMERIC);
-       $arr = array_flip($arr);
-       return end($arr);
+        $arr = array_count_values($arr);
+        asort($arr, SORT_NUMERIC);
+        $arr = array_flip($arr);
+        return end($arr);
     }
+
+    public function nth($n, $offset = 0)
+    {
+        $len = count($this->arr);
+        $ans = [];
+        for ($i = $offset; $i < $len; $i += $n) {
+            if ($i < $len) {
+                $ans[] = $this->arr[$i];
+            }
+        }
+        return $ans;
+    }
+
+    public function only($arr)
+    {
+        $ans = [];
+        foreach ($arr as $key) {
+            if (isset($this->arr[$key])) {
+                $ans[$key] = $this->arr[$key];
+            }
+        }
+        return $ans;
+    }
+
+    public function pad($size, $padding)
+    {
+        $ans = $this->arr;
+        if (abs($size) > count($this->arr)) {
+            $ans = array_pad($ans, $size, $padding);
+        }
+        return collect($ans);
+    }
+
 
 
     // private function getClosureParameters($closure)
