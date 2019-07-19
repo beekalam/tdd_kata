@@ -4,6 +4,8 @@
 namespace App\collections;
 
 
+use http\Exception\InvalidArgumentException;
+
 class Collection
 {
     private $arr;
@@ -697,6 +699,99 @@ class Collection
             $ans = array_pad($ans, $size, $padding);
         }
         return collect($ans);
+    }
+
+    public function partition($callable)
+    {
+        $ans = [];
+        foreach ($this->arr as $v) {
+            if ($callable($v)) {
+                $ans[0][] = $v;
+            } else {
+                $ans[1][] = $v;
+            }
+        }
+        return [collect($ans[0]), collect($ans[1])];
+    }
+
+    public function pipe($callable)
+    {
+        return $callable($this);
+    }
+
+    public function pluck($key, $result_key = null)
+    {
+        if (is_null($result_key)) {
+            return collect(array_column($this->arr, $key));
+        } else {
+            return collect(
+                array_combine(
+                    array_column($this->arr, $result_key),
+                    array_column($this->arr, $key)
+                )
+            );
+        }
+    }
+
+    public function pop()
+    {
+        return array_pop($this->arr);
+    }
+
+    public function prepend($value, $key = null)
+    {
+        if (is_null($key)) {
+            array_unshift($this->arr,  $value);
+        } else {
+            $this->arr = [$key => $value] + $this->arr;
+        }
+        return $this;
+    }
+
+    public function pull($key)
+    {
+        if (isset($this->arr[$key])) {
+            $value = $this->arr[$key];
+            unset($this->arr[$key]);
+            return $value;
+        }
+        return null;
+    }
+
+    public function push($value)
+    {
+        array_push($this->arr, $value);
+        return $this;
+    }
+
+    public function put($key, $value)
+    {
+        $this->arr[$key] = $value;
+        return $this;
+    }
+
+    public function random($numberOfRandomItems = 0)
+    {
+        if ($numberOfRandomItems == 0) {
+            return $this->arr[array_rand($this->arr)];
+        } else {
+            if ($numberOfRandomItems > count($this->arr))
+                throw new \InvalidArgumentException();
+            $ans = [];
+            while (count($ans) < $numberOfRandomItems) {
+                $random = $this->arr[array_rand($this->arr)];
+                if (!in_array($random, $ans)) {
+                    $ans[] = $random;
+                }
+            }
+            return collect($ans);
+        }
+    }
+
+
+    public function sum()
+    {
+        return array_sum($this->arr);
     }
 
 

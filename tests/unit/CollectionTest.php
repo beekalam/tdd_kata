@@ -904,8 +904,162 @@ class CollectionTest extends TestCase
 
         $this->assertEquals(['A', 'B', 'C', 0, 0], $collection->pad(5, 0)->all());
 
-        $this->assertEquals([0, 0, 'A', 'B', 'C'],$collection->pad(-5,0)->all());
+        $this->assertEquals([0, 0, 'A', 'B', 'C'], $collection->pad(-5, 0)->all());
     }
 
+    /** @test */
+    function can_partition_collection_items()
+    {
+
+        $collection = collect([1, 2, 3, 4, 5, 6]);
+
+        list($underThree, $equalOrAboveThree) = $collection->partition(function ($i) {
+            return $i < 3;
+        });
+
+        $this->assertEquals([1, 2], $underThree->all());
+
+        $this->assertEquals([3, 4, 5, 6], $equalOrAboveThree->all());
+    }
+
+    /** @test */
+    function can_pass_collection_to_the_given_callback()
+    {
+        $collection = collect([1, 2, 3]);
+
+        $piped = $collection->pipe(function ($collection) {
+            return $collection->sum();
+        });
+
+        $this->assertEquals(6, $piped);
+    }
+
+    /** @test */
+    function can_retrieve_all_values_of_a_given_key()
+    {
+        $collection = collect([
+            ['product_id' => 'prod-100', 'name' => 'Desk'],
+            ['product_id' => 'prod-200', 'name' => 'Chair'],
+        ]);
+
+        $plucked = $collection->pluck('name');
+
+        $this->assertEquals(['Desk', 'Chair'], $plucked->all());
+    }
+
+    /** @test */
+    function pluck_can_accept_second_argument_as_the_result_keys_for_values()
+    {
+        $collection = collect([
+            ['product_id' => 'prod-100', 'name' => 'Desk'],
+            ['product_id' => 'prod-200', 'name' => 'Chair'],
+        ]);
+        $plucked = $collection->pluck('name', 'product_id');
+
+
+        $this->assertEquals(['prod-100' => 'Desk', 'prod-200' => 'Chair'], $plucked->all());
+    }
+
+    /** @test */
+    function pluck_will_over_keep_the_last_matching_element_if_duplicate_keys_exist()
+    {
+        $collection = collect([
+            ['brand' => 'Tesla', 'color' => 'red'],
+            ['brand' => 'Pagani', 'color' => 'white'],
+            ['brand' => 'Tesla', 'color' => 'black'],
+            ['brand' => 'Pagani', 'color' => 'orange'],
+        ]);
+
+        $plucked = $collection->pluck('color', 'brand');
+
+        $this->assertEquals(['Tesla' => 'black', 'Pagani' => 'orange'], $plucked->all());
+    }
+
+    /** @test */
+    function can_remove_and_return_the_last_element_in_collection()
+    {
+        $collection = collect([1, 2, 3, 4, 5]);
+
+        $this->assertEquals(5, $collection->pop());
+        $this->assertEquals([1, 2, 3, 4], $collection->all());
+    }
+
+    /** @test */
+    function can_prepend_item_to_the_beginning_of_collection()
+    {
+        $collection = collect([1, 2, 3, 4, 5]);
+
+        $collection->prepend(0);
+
+        $this->assertEquals([0, 1, 2, 3, 4, 5], $collection->all());
+    }
+
+    /** @test */
+    function prepend_accepts_second_argument_as_the_key()
+    {
+        $collection = collect(['one' => 1, 'two' => 2]);
+
+        $collection->prepend(0, 'zero');
+
+        $this->assertEquals(['zero' => 0, 'one' => 1, 'two' => 2], $collection->all());
+    }
+
+    /** @test */
+    function can_remove_and_return_an_item_from_collection_by_its_key()
+    {
+        $collection = collect(['product_id' => 'prod-100', 'name' => 'Desk']);
+
+        $this->assertEquals('Desk', $collection->pull('name'));
+        $this->assertEquals(['product_id' => 'prod-100'], $collection->all());
+    }
+
+    /** @test */
+    function can_append_an_item_to_the_end_of_collection()
+    {
+        $collection = collect([1, 2, 3, 4]);
+
+        $collection->push(5);
+
+        $this->assertEquals([1, 2, 3, 4, 5], $collection->all());
+    }
+
+    /** @test */
+    function can_set_given_key_value_using_put_method()
+    {
+        $collection = collect(['product_id' => 1, 'name' => 'Desk']);
+
+        $collection->put('price', 100);
+
+        $this->assertEquals(['product_id' => 1, 'name' => 'Desk', 'price' => 100], $collection->all());
+    }
+
+    /** @test */
+    function can_return_a_random_item_from_collection()
+    {
+        $collection = collect([1, 2, 3, 4, 5]);
+
+        $random = $collection->random();
+        $this->assertTrue(in_array($random, $collection->all()));
+    }
+
+    /** @test */
+    function random_accepts_an_argument_that_returns_the_number_of_items_to_return()
+    {
+        $collection = collect([1, 2, 3, 4, 5]);
+
+        $random = $collection->random(3);
+
+        foreach ($random->all() as $rnd) {
+            $this->assertTrue(in_array($rnd, $collection->all()));
+        }
+    }
+
+    /** @test */
+    function random_will_throw_InvalidArgumentException_if_number_of_random_items_is_greater_than_collections_length()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $collection = collect([1, 2, 3, 4, 5]);
+        $random = $collection->random(10);
+    }
 
 }
