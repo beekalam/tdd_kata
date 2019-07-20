@@ -1062,4 +1062,104 @@ class CollectionTest extends TestCase
         $random = $collection->random(10);
     }
 
+    /** @test */
+    function can_reduce_a_collection_to_a_single_value()
+    {
+        $collection = collect([1, 2, 3]);
+
+        $total = $collection->reduce(function ($carry, $item) {
+            return $carry + $item;
+        });
+
+        $this->assertEquals(6, $total);
+    }
+
+    /** @test */
+    function reduce_accepts_an_initial_carry_value()
+    {
+        $collection = collect([1, 2, 3]);
+
+        $total = $collection->reduce(function ($carry, $item) {
+            return $carry + $item;
+        }, 4);
+
+        $this->assertEquals(10, $total);
+    }
+
+    /** @test */
+    function can_remove_items_from_collection_using_a_callback()
+    {
+        $collection = collect([1, 2, 3, 4]);
+
+        $filtered = $collection->reject(function ($value, $key) {
+            return $value > 2;
+        });
+
+        $this->assertEquals([1, 2], $filtered->all());
+    }
+
+    /** @test */
+    function can_merge_collection_with_array_and_overwrite_existing_array_items_in_collection_according_to_numeric_keys()
+    {
+        $collection = collect(['Taylor', 'Abigail', 'James']);
+
+        $replaced = $collection->replace([1 => 'Victoria', 3 => 'Finn']);
+
+        $this->assertEquals(['Taylor', 'Victoria', 'James', 'Finn'], $replaced->all());
+    }
+
+    /** @test */
+    function replacerecursive()
+    {
+        $collection = collect(['Taylor', 'Abigail', ['James', 'Victoria', 'Finn']]);
+
+        $replaced = $collection->replaceRecursive(['Charlie', 2 => [1 => 'King']]);
+
+        $this->assertEquals(['Charlie', 'Abigail', ['James', 'King', 'Finn']], $replaced->all());
+    }
+
+    /** @test */
+    function can_reverse_collection_items()
+    {
+        $collection = collect(['a', 'b', 'c', 'd', 'e']);
+
+        $reversed = $collection->reverse();
+
+        $expected = [
+            4 => 'e',
+            3 => 'd',
+            2 => 'c',
+            1 => 'b',
+            0 => 'a',
+        ];
+        $this->assertEquals($expected, $reversed);
+    }
+
+    /** @test */
+    function can_search_collection_items()
+    {
+        $collection = collect([2, 4, 6, 8]);
+
+        $this->assertEquals(1, $collection->search(4));
+    }
+
+    /** @test */
+    function search_can_be_strict_about_types()
+    {
+        $collection = collect([2, 4, 6, 8]);
+
+        $this->assertEquals(false, $collection->search('4', true));
+    }
+
+    /** @test */
+    function search_may_accept_a_callback()
+    {
+        $collection = collect([2, 4, 6, 8]);
+        $ans = $collection->search(function ($item, $key) {
+            return $item > 5;
+        });
+        $this->assertEquals(2, $ans);
+    }
+
+
 }

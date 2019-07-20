@@ -4,8 +4,6 @@
 namespace App\collections;
 
 
-use http\Exception\InvalidArgumentException;
-
 class Collection
 {
     private $arr;
@@ -741,7 +739,7 @@ class Collection
     public function prepend($value, $key = null)
     {
         if (is_null($key)) {
-            array_unshift($this->arr,  $value);
+            array_unshift($this->arr, $value);
         } else {
             $this->arr = [$key => $value] + $this->arr;
         }
@@ -770,9 +768,9 @@ class Collection
         return $this;
     }
 
-    public function random($numberOfRandomItems = 0)
+    public function random($numberOfRandomItems = 1)
     {
-        if ($numberOfRandomItems == 0) {
+        if ($numberOfRandomItems == 1) {
             return $this->arr[array_rand($this->arr)];
         } else {
             if ($numberOfRandomItems > count($this->arr))
@@ -786,6 +784,86 @@ class Collection
             }
             return collect($ans);
         }
+    }
+
+    public function reduce($callable, $carry = null)
+    {
+        $ans = null;
+        foreach ($this->arr as $item) {
+            $ans += $callable($carry, $item);
+            $carry = null;
+        }
+        return $ans;
+    }
+
+    public function reject($callable)
+    {
+        $ans = [];
+        foreach ($this->arr as $k => $v) {
+            if (!$callable($v, $k)) {
+                $ans[] = $v;
+            }
+        }
+        return collect($ans);
+    }
+
+    public function replace($replaceItems)
+    {
+        $ans = [];
+        $keys = array_keys($replaceItems);
+        foreach ($this->arr as $k => $v) {
+            if (in_array($k, $keys)) {
+                $ans[] = $replaceItems[$k];
+            } else {
+                $ans[] = $v;
+            }
+        }
+        foreach ($keys as $k) {
+            if (!in_array($k, array_keys($this->arr))) {
+                $ans[$k] = $replaceItems[$k];
+            }
+        }
+        return collect($ans);
+    }
+
+    public function replaceRecursive($replaceItems)
+    {
+        $ans = [];
+        $keys = array_keys($replaceItems);
+        foreach ($this->arr as $k => $v) {
+            if (in_array($k, $keys)) {
+                if (is_array($replaceItems[$k]) && is_array($this->arr[$k])) {
+                    $ans[] = collect($this->arr[$k])->replace($replaceItems[$k])->all();
+                } else {
+                    $ans[] = $replaceItems[$k];
+                }
+            } else {
+                $ans[] = $v;
+            }
+        }
+        foreach ($keys as $k) {
+            if (!in_array($k, array_keys($this->arr))) {
+                $ans[$k] = $replaceItems[$k];
+            }
+        }
+        return collect($ans);
+    }
+
+    public function reverse()
+    {
+        return array_reverse($this->arr, true);
+    }
+
+    public function search($searchItem,$strict = false)
+    {
+        if(is_callable($searchItem)){
+           foreach($this->arr as $k=>$v){
+               if($searchItem($v,$k)) return $k;
+           }
+        }else{
+            return array_search($searchItem,$this->arr,$strict);
+        }
+        return false;
     }
 
 
