@@ -854,22 +854,72 @@ class Collection
         return array_reverse($this->arr, true);
     }
 
-    public function search($searchItem,$strict = false)
+    public function search($searchItem, $strict = false)
     {
-        if(is_callable($searchItem)){
-           foreach($this->arr as $k=>$v){
-               if($searchItem($v,$k)) return $k;
-           }
-        }else{
-            return array_search($searchItem,$this->arr,$strict);
+        if (is_callable($searchItem)) {
+            foreach ($this->arr as $k => $v) {
+                if ($searchItem($v, $k)) return $k;
+            }
+        } else {
+            return array_search($searchItem, $this->arr, $strict);
         }
         return false;
+    }
+
+    public function shift()
+    {
+        return array_shift($this->arr);
+    }
+
+    public function shuffle()
+    {
+        shuffle($this->arr);
+        return $this;
+    }
+
+    public function slice($index, $size = null)
+    {
+        return is_null($size) ? collect(array_slice($this->arr, $index)) : collect(array_slice($this->arr, $index, $size));
+    }
+
+    public function some($key, $value = null)
+    {
+        return $this->contains($key, $value);
+    }
+
+    public function sort()
+    {
+        sort($this->arr);
+        return $this;
+    }
+
+    public function sortBy($key)
+    {
+        if (is_callable($key)) {
+            $ans = [];
+            foreach ($this->arr as $k => $v) {
+                $v["__sortkey__"] = $key($v, $k);
+                $ans[$k] = $v;
+            }
+            array_multisort(array_column($ans, "__sortkey__"), SORT_ASC, $ans);
+            $this->arrayRemoveKey($ans, "__sortkey__");
+            $this->arr = $ans;
+        } else {
+            $arr = array_column($this->arr, $key);
+            array_multisort($arr, SORT_ASC, $this->arr);
+        }
+        return $this;
     }
 
 
     public function sum()
     {
         return array_sum($this->arr);
+    }
+
+    public function values()
+    {
+        return collect(array_merge([], $this->arr));
     }
 
 

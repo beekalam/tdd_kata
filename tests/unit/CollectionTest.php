@@ -1161,5 +1161,97 @@ class CollectionTest extends TestCase
         $this->assertEquals(2, $ans);
     }
 
+    /** @test */
+    function can_remove_first_item_from_collection()
+    {
+        $collection = collect([1, 2, 3, 4, 5]);
 
+        $this->assertEquals(1, $collection->shift());
+
+        $this->assertEquals([2, 3, 4, 5], $collection->all());
+    }
+
+    /** @test */
+    function can_shuffle_collection_items()
+    {
+        $arr = [1, 2, 3, 4, 5];
+        $collection = collect($arr);
+
+        $this->assertNotEquals($arr, $collection->shuffle()->all());
+        $this->assertEquals(count($arr), count($collection->all()));
+    }
+
+    /** @test */
+    function can_slice_collection_items()
+    {
+        $collection = collect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+        $this->assertEquals([5, 6, 7, 8, 9, 10], $collection->slice(4)->all());
+        $this->assertEquals([5, 6], $collection->slice(4, $size = 2)->all());
+    }
+
+    /** @test */
+    function can_sort_collection_items()
+    {
+        $collection = collect([5, 3, 1, 2, 4]);
+
+        $this->assertEquals([1, 2, 3, 4, 5], $collection->sort()->values()->all());
+    }
+
+    /** @test */
+    function can_reset_collection_keys_to_consecutive_integers()
+    {
+        $collection = collect([
+            10 => ['product' => 'Desk', 'price' => 200],
+            11 => ['product' => 'Desk', 'price' => 200]
+        ]);
+
+        $expected = [
+            0 => ['product' => 'Desk', 'price' => 200],
+            1 => ['product' => 'Desk', 'price' => 200],
+        ];
+
+        $this->assertEquals($expected, $collection->values()->all());
+    }
+
+    /** @test */
+    function can_sort_collection_items_by_a_given_key()
+    {
+        $collection = collect([
+            ['name' => 'Desk', 'price' => 200],
+            ['name' => 'Chair', 'price' => 100],
+            ['name' => 'Bookcase', 'price' => 150],
+        ]);
+
+        $expected = [
+            ['name' => 'Chair', 'price' => 100],
+            ['name' => 'Bookcase', 'price' => 150],
+            ['name' => 'Desk', 'price' => 200],
+        ];
+        $this->assertEquals($expected, $collection->sortBy('price')->values()->all());
+    }
+
+    /** @test */
+    function sortBy_may_accept_a_callable_sorting_function()
+    {
+        $collection = collect([
+            ['name' => 'Desk', 'colors' => ['Black', 'Mahogany']],
+            ['name' => 'Chair', 'colors' => ['Black']],
+            ['name' => 'Bookcase', 'colors' => ['Red', 'Beige', 'Brown']],
+        ]);
+
+        $sorted = $collection->sortBy(function ($product, $key) {
+            return count($product['colors']);
+        });
+
+
+        $expected = [
+            ['name' => 'Chair', 'colors' => ['Black']],
+            ['name' => 'Desk', 'colors' => ['Black', 'Mahogany']],
+            ['name' => 'Bookcase', 'colors' => ['Red', 'Beige', 'Brown']],
+        ];
+
+        $this->assertEquals($expected, $sorted->values()->all());
+
+    }
 }
