@@ -1252,6 +1252,119 @@ class CollectionTest extends TestCase
         ];
 
         $this->assertEquals($expected, $sorted->values()->all());
+    }
 
+    /** @test */
+    function can_sort_collection_by_keys()
+    {
+        $collection = collect([
+            'id'    => 22345,
+            'first' => 'John',
+            'last'  => 'Doe',
+        ]);
+
+        $expected = [
+            'first' => 'John',
+            'id'    => 22345,
+            'last'  => 'Doe',
+        ];
+
+        $this->assertEquals($expected, $collection->sortKeys());
+    }
+
+    /** @test */
+    function can_splice_collection_items()
+    {
+        $collection = collect([1, 2, 3, 4, 5]);
+
+        $chunk = $collection->splice(2);
+
+        $this->assertEquals([3, 4, 5], $chunk->all());
+        $this->assertEquals([1, 2], $collection->all());
+    }
+
+    /** @test */
+    function slice_accepts_an_argument_to_limit_size_of_resulting_chunk()
+    {
+        $collection = collect([1, 2, 3, 4, 5]);
+
+        $chunk = $collection->splice(2, 1);
+
+        $this->assertEquals([3], $chunk->all());
+        $this->assertEquals([1, 2, 4, 5], $collection->all());
+    }
+
+    /** @test */
+    function slice_may_accept_a_third_argument_to_as_replacements()
+    {
+        $collection = collect([1, 2, 3, 4, 5]);
+
+        $chunk = $collection->splice(2, 1, [10, 11]);
+
+        $this->assertEquals([3], $chunk->all());
+        $this->assertEquals([1, 2, 10, 11, 4, 5], $collection->all());
+    }
+
+    /** @test */
+    function can_split_collection_to_groups()
+    {
+        $collection = collect([1, 2, 3, 4, 5]);
+
+        $groups = $collection->split(3);
+
+        $this->assertEquals([[1, 2], [3, 4], [5]], $groups->toArray());
+    }
+
+    /** @test */
+    function can_sum_collection_values()
+    {
+        $this->assertEquals(15, collect([1, 2, 3, 4, 5])->sum());
+    }
+
+    /** @test */
+    function can_sum_collection_values_by_key()
+    {
+        $collection = collect([
+            ['name' => 'JavaScript: The Good Parts', 'pages' => 176],
+            ['name' => 'JavaScript: The Definitive Guide', 'pages' => 1096],
+        ]);
+
+        $this->assertEquals(1272, $collection->sum('pages'));
+    }
+
+    /** @test */
+    function sum_may_accept_a_callback()
+    {
+        $collection = collect([
+            ['name' => 'Chair', 'colors' => ['Black']],
+            ['name' => 'Desk', 'colors' => ['Black', 'Mahogany']],
+            ['name' => 'Bookcase', 'colors' => ['Red', 'Beige', 'Brown']],
+        ]);
+
+        $s = $collection->sum(function ($product) {
+            return count($product['colors']);
+        });
+
+        $this->assertEquals(6, $s);
+    }
+
+    /** @test */
+    function can_extract_new_collection_based_on_number_of_items()
+    {
+        $collection = collect([0, 1, 2, 3, 4, 5]);
+
+        $chunk = $collection->take(3);
+
+        $this->assertEquals( [0, 1, 2], $chunk->all());
+    }
+
+    /** @test */
+    function take_can_accept_negative_integer_to_return_items_from_the_end_of_collection_items()
+    {
+        $collection = collect([0, 1, 2, 3, 4, 5]);
+
+        $chunk = $collection->take(-2);
+
+        $this->assertEquals( [4, 5], $chunk->all());
     }
 }

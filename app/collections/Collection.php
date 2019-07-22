@@ -893,7 +893,7 @@ class Collection
         return $this;
     }
 
-    public function sortBy($key)
+    public function sortBy($key, $sort_direction = SORT_ASC)
     {
         if (is_callable($key)) {
             $ans = [];
@@ -901,20 +901,60 @@ class Collection
                 $v["__sortkey__"] = $key($v, $k);
                 $ans[$k] = $v;
             }
-            array_multisort(array_column($ans, "__sortkey__"), SORT_ASC, $ans);
+            array_multisort(array_column($ans, "__sortkey__"), $sort_direction, $ans);
             $this->arrayRemoveKey($ans, "__sortkey__");
             $this->arr = $ans;
         } else {
             $arr = array_column($this->arr, $key);
-            array_multisort($arr, SORT_ASC, $this->arr);
+            array_multisort($arr, $sort_direction, $this->arr);
         }
         return $this;
     }
 
-
-    public function sum()
+    public function sortKeys($sort_direction = SORT_ASC)
     {
-        return array_sum($this->arr);
+        array_multisort($this->arr, $sort_direction);
+        return $this->arr;
+    }
+
+    public function splice($index, $length = null, $replacements = null)
+    {
+        $slice = [];
+        if (is_null($length)) {
+            $slice = array_splice($this->arr, $index);
+        } else if (!is_null($length) && is_null($replacements)) {
+            $slice = array_splice($this->arr, $index, $length);
+        } else if (!is_null($length) && !is_null($replacements)) {
+            $slice = array_splice($this->arr, $index, $length, $replacements);
+        }
+        return collect($slice);
+    }
+
+    public function split($size)
+    {
+        $chunk_size = intval(ceil(count($this->arr) / $size));
+        $ans = array_chunk($this->arr, $chunk_size);
+        return collect($ans);
+    }
+
+
+    public function sum($key = null)
+    {
+        if (is_callable($key)) {
+            $sum = 0;
+            foreach ($this->arr as $row) {
+                $sum += $key($row);
+            }
+            return $sum;
+        }
+        return is_null($key) ? array_sum($this->arr) : array_sum(array_column($this->arr, $key));
+    }
+
+    public function take($size)
+    {
+        $index = $size < 0 ?  count($this->arr) - abs($size) : 0;
+        $size = $size < 0 ? null : $size;
+        return collect(array_slice($this->arr,$index,$size));
     }
 
     public function values()
