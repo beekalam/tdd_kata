@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\collections\Collection;
 use App\collections\CollectionException;
 use PHPUnit\Framework\TestCase;
 
@@ -1355,7 +1356,7 @@ class CollectionTest extends TestCase
 
         $chunk = $collection->take(3);
 
-        $this->assertEquals( [0, 1, 2], $chunk->all());
+        $this->assertEquals([0, 1, 2], $chunk->all());
     }
 
     /** @test */
@@ -1365,6 +1366,52 @@ class CollectionTest extends TestCase
 
         $chunk = $collection->take(-2);
 
-        $this->assertEquals( [4, 5], $chunk->all());
+        $this->assertEquals([4, 5], $chunk->all());
     }
+
+    /** @test */
+    function can_pass_collection_to_a_function()
+    {
+    }
+
+    /** @test */
+    function can_create_a_collection_by_invoking_a_callback()
+    {
+        $collection = Collection::times(10, function ($number) {
+            return $number * 9;
+        });
+
+        $this->assertEquals([9, 18, 27, 36, 45, 54, 63, 72, 81, 90], $collection->all());
+    }
+
+    /** @test */
+    function can_convert_collection_items_to_json()
+    {
+        $collection = collect(['name' => 'Desk', 'price' => 200]);
+
+        $this->assertEquals('{"name":"Desk","price":200}', $collection->toJson());
+    }
+
+    /** @test */
+    function can_transform_collection_items_using_a_callback()
+    {
+        $collection = collect([1, 2, 3, 4, 5]);
+
+        $collection->transform(function ($item, $key) {
+            return $item * 2;
+        });
+
+        $this->assertEquals([2, 4, 6, 8, 10], $collection->all());
+    }
+
+    /** @test */
+    function can_add_a_given_array_to_collection_and_not_replacing_anything_existing_keys()
+    {
+        $collection = collect([1 => ['a'], 2 => ['b']]);
+
+        $union = $collection->union([3 => ['c'], 1 => ['b']]);
+
+        $this->assertEquals([1 => ['a'], 2 => ['b'], 3 => ['c']], $union->all());
+    }
+
 }

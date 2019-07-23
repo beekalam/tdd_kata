@@ -952,14 +952,23 @@ class Collection
 
     public function take($size)
     {
-        $index = $size < 0 ?  count($this->arr) - abs($size) : 0;
+        $index = $size < 0 ? count($this->arr) - abs($size) : 0;
         $size = $size < 0 ? null : $size;
-        return collect(array_slice($this->arr,$index,$size));
+        return collect(array_slice($this->arr, $index, $size));
     }
 
     public function values()
     {
         return collect(array_merge([], $this->arr));
+    }
+
+    public static function times($count, $callable)
+    {
+        $ans = [];
+        for ($i = 1; $i <= $count; $i++) {
+            $ans[] = $callable($i);
+        }
+        return collect($ans);
     }
 
 
@@ -978,6 +987,34 @@ class Collection
     public function toArray()
     {
         return $this->arr;
+    }
+
+    public function toJson()
+    {
+        return json_encode($this->arr);
+    }
+
+    public function transform($callable)
+    {
+        $ans = [];
+        foreach($this->arr as $k => $v){
+           $ans[] = $callable($v,$k);
+        }
+        $this->arr = $ans;
+        return $this;
+    }
+
+    public function union($input)
+    {
+        $ans = [];
+        foreach(array_merge(array_keys($this->arr), array_keys($input)) as $k){
+            if(isset($this->arr[$k])){
+                $ans[$k] = $this->arr[$k];
+            }else{
+                $ans[$k] = $input[$k];
+            }
+        }
+        return collect($ans);
     }
 
     /**
@@ -1022,6 +1059,8 @@ class Collection
         }
         return false;
     }
+
+
 
 
 }
