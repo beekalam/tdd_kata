@@ -997,8 +997,8 @@ class Collection
     public function transform($callable)
     {
         $ans = [];
-        foreach($this->arr as $k => $v){
-           $ans[] = $callable($v,$k);
+        foreach ($this->arr as $k => $v) {
+            $ans[] = $callable($v, $k);
         }
         $this->arr = $ans;
         return $this;
@@ -1007,11 +1007,58 @@ class Collection
     public function union($input)
     {
         $ans = [];
-        foreach(array_merge(array_keys($this->arr), array_keys($input)) as $k){
-            if(isset($this->arr[$k])){
+        foreach (array_merge(array_keys($this->arr), array_keys($input)) as $k) {
+            if (isset($this->arr[$k])) {
                 $ans[$k] = $this->arr[$k];
-            }else{
+            } else {
                 $ans[$k] = $input[$k];
+            }
+        }
+        return collect($ans);
+    }
+
+    public function unique($key = null)
+    {
+        if (is_callable($key)) {
+            return $this->_uniqueUsingCallable($key);
+        } else if (is_null($key)) {
+            return collect(array_unique($this->arr));
+        } else {
+            return $this->_uinqueUsingKey($key);
+        }
+    }
+
+    /**
+     * @param $key
+     * @return Collection
+     */
+    private function _uniqueUsingCallable($callable)
+    {
+        $added = [];
+        $ans = [];
+        foreach ($this->arr as $row) {
+            $res = $callable($row);
+            if (!in_array($res, $added)) {
+                $ans[] = $row;
+                $added[] = $res;
+            }
+        }
+        return collect($ans);
+    }
+
+    /**
+     * @param $key
+     * @return Collection
+     */
+    private function _uinqueUsingKey($key)
+    {
+        $ans = [];
+        $unique = collect(array_column($this->arr, $key))->unique()->values()->toArray();
+        $added = [];
+        foreach ($this->arr as $row) {
+            if (!in_array($row[$key], $added) && in_array($row[$key], $unique)) {
+                $ans[] = $row;
+                $added[] = $row[$key];
             }
         }
         return collect($ans);
@@ -1059,7 +1106,6 @@ class Collection
         }
         return false;
     }
-
 
 
 

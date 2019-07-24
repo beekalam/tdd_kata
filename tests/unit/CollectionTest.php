@@ -1414,4 +1414,57 @@ class CollectionTest extends TestCase
         $this->assertEquals([1 => ['a'], 2 => ['b'], 3 => ['c']], $union->all());
     }
 
+    /** @test */
+    function can_extract_unique_values_from_collection()
+    {
+        $collection = collect([1, 1, 2, 2, 3, 4, 2]);
+        $this->assertEquals([1, 2, 3, 4], $collection->unique()->values()->all());
+    }
+
+    /** @test */
+    function can_extract_unique_values_from_collection_by_key()
+    {
+        $collection = collect([
+            ['name' => 'iPhone 6', 'brand' => 'Apple', 'type' => 'phone'],
+            ['name' => 'iPhone 5', 'brand' => 'Apple', 'type' => 'phone'],
+            ['name' => 'Apple Watch', 'brand' => 'Apple', 'type' => 'watch'],
+            ['name' => 'Galaxy S6', 'brand' => 'Samsung', 'type' => 'phone'],
+            ['name' => 'Galaxy Gear', 'brand' => 'Samsung', 'type' => 'watch'],
+        ]);
+
+        $unique = $collection->unique('brand');
+
+        $expected = [
+            ['name' => 'iPhone 6', 'brand' => 'Apple', 'type' => 'phone'],
+            ['name' => 'Galaxy S6', 'brand' => 'Samsung', 'type' => 'phone'],
+        ];
+
+        $this->assertEquals($expected, $unique->values()->all());
+    }
+
+    /** @test */
+    function can_extract_values_from_collection_based_on_a_callback()
+    {
+        $collection = collect([
+            ['name' => 'iPhone 6', 'brand' => 'Apple', 'type' => 'phone'],
+            ['name' => 'iPhone 5', 'brand' => 'Apple', 'type' => 'phone'],
+            ['name' => 'Apple Watch', 'brand' => 'Apple', 'type' => 'watch'],
+            ['name' => 'Galaxy S6', 'brand' => 'Samsung', 'type' => 'phone'],
+            ['name' => 'Galaxy Gear', 'brand' => 'Samsung', 'type' => 'watch'],
+        ]);
+
+        $unique = $collection->unique(function ($item) {
+            return $item['brand'] . $item['type'];
+        });
+
+        $expected = [
+            ['name' => 'iPhone 6', 'brand' => 'Apple', 'type' => 'phone'],
+            ['name' => 'Apple Watch', 'brand' => 'Apple', 'type' => 'watch'],
+            ['name' => 'Galaxy S6', 'brand' => 'Samsung', 'type' => 'phone'],
+            ['name' => 'Galaxy Gear', 'brand' => 'Samsung', 'type' => 'watch'],
+        ];
+
+        $this->assertEquals($expected,$unique->values()->all());
+    }
+
 }
