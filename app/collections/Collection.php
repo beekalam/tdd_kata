@@ -1108,7 +1108,6 @@ class Collection
     }
 
 
-
 }
 
 class CollectionException extends \Exception
