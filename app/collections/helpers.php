@@ -1,11 +1,14 @@
 <?php
 
-
 use App\collections\Collection;
 
 function collect($array)
 {
-    return new Collection($array);
+    if (is_array($array)) {
+        return new Collection($array);
+    } else {
+        return new Collection([$array]);
+    }
 }
 
 function isAssociative($array)

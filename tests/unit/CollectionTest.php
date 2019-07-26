@@ -1392,6 +1392,7 @@ class CollectionTest extends TestCase
         $this->assertEquals('{"name":"Desk","price":200}', $collection->toJson());
     }
 
+
     /** @test */
     function can_transform_collection_items_using_a_callback()
     {
@@ -1464,7 +1465,35 @@ class CollectionTest extends TestCase
             ['name' => 'Galaxy Gear', 'brand' => 'Samsung', 'type' => 'watch'],
         ];
 
-        $this->assertEquals($expected,$unique->values()->all());
+        $this->assertEquals($expected, $unique->values()->all());
     }
+
+    /** @test */
+    function run_a_call_back_if_first_argument_is_false()
+    {
+        $collection = collect([1, 2, 3]);
+
+
+        $collection->unless(true, function ($collection) {
+            return $collection->push(4);
+        });
+
+
+        $collection->unless(false, function ($collection) {
+            return $collection->push(5);
+        });
+
+
+        $this->assertEquals([1, 2, 3, 5], $collection->all());
+    }
+
+    /** @test */
+    function can_return_collections_underlying_items()
+    {
+        $this->assertEquals(['John Doe'], Collection::unwrap(collect('John Doe')));
+        $this->assertEquals(['John Doe'], Collection::unwrap(['John Doe']));
+        $this->assertEquals('John Doe', Collection::unwrap('John Doe'));
+    }
+
 
 }

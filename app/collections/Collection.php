@@ -1064,6 +1064,30 @@ class Collection
         return collect($ans);
     }
 
+    public function unless($condition, $callable)
+    {
+        if (!$condition) {
+            return $callable($this);
+        }
+        return $this;
+    }
+
+    public static function unwrap($to_unwrap)
+    {
+        if ($to_unwrap instanceof Collection) {
+            return $to_unwrap->getItems();
+        } else if (is_array($to_unwrap)) {
+            return Collection::unwrap(collect($to_unwrap));
+        } else {
+            return $to_unwrap;
+        }
+    }
+
+    public function getItems()
+    {
+        return $this->arr;
+    }
+
     /**
      * @param $key
      * @return bool
