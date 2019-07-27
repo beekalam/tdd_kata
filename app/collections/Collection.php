@@ -962,6 +962,15 @@ class Collection
         return collect(array_merge([], $this->arr));
     }
 
+    public function when($condition, $callable)
+    {
+        if ($condition) {
+            return $callable($this);
+        }
+
+        return $this;
+    }
+
     public static function times($count, $callable)
     {
         $ans = [];
@@ -1072,6 +1081,22 @@ class Collection
         return $this;
     }
 
+    public function whenEmpty($callable)
+    {
+        if (empty($this->arr)) {
+            $callable($this);
+        }
+        return $this;
+    }
+
+    public function whenNotEmpty($callable)
+    {
+        if (!empty($this->arr)) {
+            $callable($this);
+        }
+        return $this;
+    }
+
     public static function unwrap($to_unwrap)
     {
         if ($to_unwrap instanceof Collection) {
@@ -1087,6 +1112,7 @@ class Collection
     {
         return $this->arr;
     }
+
 
     /**
      * @param $key

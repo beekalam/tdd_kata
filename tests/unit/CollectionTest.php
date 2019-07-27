@@ -1495,5 +1495,61 @@ class CollectionTest extends TestCase
         $this->assertEquals('John Doe', Collection::unwrap('John Doe'));
     }
 
+    /** @test */
+    function can_call_a_callback_if_the_first_argument_is_true()
+    {
+        $collection = collect([1, 2, 3]);
+
+        $collection->when(true, function ($collection) {
+            return $collection->push(4);
+        });
+
+        $collection->when(false, function ($collection) {
+            return $collection->push(5);
+        });
+
+        $this->assertEquals([1, 2, 3, 4], $collection->all());
+    }
+
+    /** @test */
+    function can_invoke_a_callback_when_the_collection_is_empty()
+    {
+        $collection = collect(['michael', 'tom']);
+
+        $collection->whenEmpty(function ($collection) {
+            return $collection->push('adam');
+        });
+
+
+        $this->assertEquals(['michael', 'tom'], $collection->all());
+
+        $collection = collect([]);
+
+        $collection->whenEmpty(function ($collection) {
+            return $collection->push('adam');
+        });
+
+        $this->assertEquals(['adam'], $collection->all());
+    }
+
+    /** @test */
+    function can_invoke_a_callback_when_the_collection_is_not_empty()
+    {
+        $collection = collect(['michael', 'tom']);
+
+        $collection->whenNotEmpty(function ($collection) {
+            return $collection->push('adam');
+        });
+
+        $this->assertEquals(['michael', 'tom', 'adam'], $collection->all());
+
+        $collection = collect([]);
+
+        $collection->whenNotEmpty(function ($collection) {
+            return $collection->push('adam');
+        });
+
+        $this->assertEquals([], $collection->all());
+    }
 
 }
