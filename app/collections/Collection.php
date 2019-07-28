@@ -1097,6 +1097,31 @@ class Collection
         return $this;
     }
 
+    public function where($key, $value)
+    {
+        $ans = [];
+        foreach ($this->arr as $row) {
+            if (is_array($value) && isset($row[$key]) && $row[$key] >= $value[0] && $row[$key] <= $value[1]) {
+                $ans[] = $row;
+            } else if (isset($row[$key]) && $row[$key] == $value) {
+                $ans[] = $row;
+            }
+        }
+        return collect($ans);
+    }
+
+    public function whereIn($key, $values)
+    {
+        $ans = [];
+        foreach ($this->arr as $row) {
+            if (isset($row[$key]) && in_array($row[$key], $values)) {
+                $ans[] = $row;
+            }
+        }
+        return collect($ans);
+    }
+
+
     public static function unwrap($to_unwrap)
     {
         if ($to_unwrap instanceof Collection) {

@@ -1552,4 +1552,67 @@ class CollectionTest extends TestCase
         $this->assertEquals([], $collection->all());
     }
 
+    /** @test */
+    function can_filter_collection_usign_a_key_value_pari()
+    {
+        $collection = collect([
+            ['product' => 'Desk', 'price' => 200],
+            ['product' => 'Chair', 'price' => 100],
+            ['product' => 'Bookcase', 'price' => 150],
+            ['product' => 'Door', 'price' => 100],
+        ]);
+
+        $filtered = $collection->where('price', 100);
+
+        $expected = [
+            ['product' => 'Chair', 'price' => 100],
+            ['product' => 'Door', 'price' => 100],
+        ];
+
+        $this->assertEquals($expected, $filtered->all());
+    }
+
+    /** @test */
+    function can_filter_collection_using_a_key_and_values_as_range()
+    {
+        $collection = collect([
+            ['product' => 'Desk', 'price' => 200],
+            ['product' => 'Chair', 'price' => 100],
+            ['product' => 'Bookcase', 'price' => 150],
+            ['product' => 'Door', 'price' => 100],
+        ]);
+
+        $filtered = $collection->where('price', 100);
+
+        $expected = [
+            ['product' => 'Chair', 'price' => 100],
+            ['product' => 'Door', 'price' => 100],
+        ];
+
+        self::assertEquals($expected, $filtered->all());
+    }
+
+    /** @test */
+    function can_filter_collection_using_a_key_and_array_values()
+    {
+        $collection = collect([
+            ['product' => 'Desk', 'price' => 200],
+            ['product' => 'Chair', 'price' => 100],
+            ['product' => 'Bookcase', 'price' => 150],
+            ['product' => 'Door', 'price' => 100],
+        ]);
+
+        $filtered = $collection->whereIn('price', [150, 200]);
+
+        $expected = [
+            ['product' => 'Bookcase', 'price' => 150],
+            ['product' => 'Desk', 'price' => 200],
+        ];
+        $this->assertEquals(2,count($filtered->all()));
+        $this->assertTrue(in_array('Bookcase',array_column($filtered->all(),'product')));
+        $this->assertTrue(in_array('Desk',array_column($filtered->all(),'product')));
+        $this->assertTrue(in_array('150',array_column($filtered->all(),'price')));
+        $this->assertTrue(in_array('200',array_column($filtered->all(),'price')));
+    }
+
 }
