@@ -1121,6 +1121,29 @@ class Collection
         return collect($ans);
     }
 
+    public function whereNotBetween($key, $arr)
+    {
+        $ans = [];
+        foreach ($this->arr as $row) {
+            $v = isset($row[$key]) ? $row[$key] : null;
+            if (isset($row[$key]) && !($v >= $arr[0] && $v <= $arr[1])) {
+                $ans[] = $row;
+            }
+        }
+        return collect($ans);
+    }
+
+    public function whereNotIn($key, $arr)
+    {
+        $ans = [];
+        foreach ($this->arr as $row) {
+            $v = isset($row[$key]) ? $row[$key] : null;
+            if (isset($row[$key]) && !in_array($v, $arr)) {
+                $ans[] = $row;
+            }
+        }
+        return collect($ans);
+    }
 
     public static function unwrap($to_unwrap)
     {

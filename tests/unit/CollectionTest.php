@@ -1608,11 +1608,48 @@ class CollectionTest extends TestCase
             ['product' => 'Bookcase', 'price' => 150],
             ['product' => 'Desk', 'price' => 200],
         ];
-        $this->assertEquals(2,count($filtered->all()));
-        $this->assertTrue(in_array('Bookcase',array_column($filtered->all(),'product')));
-        $this->assertTrue(in_array('Desk',array_column($filtered->all(),'product')));
-        $this->assertTrue(in_array('150',array_column($filtered->all(),'price')));
-        $this->assertTrue(in_array('200',array_column($filtered->all(),'price')));
+        $this->assertEquals(2, count($filtered->all()));
+        $this->assertTrue(in_array('Bookcase', array_column($filtered->all(), 'product')));
+        $this->assertTrue(in_array('Desk', array_column($filtered->all(), 'product')));
+        $this->assertTrue(in_array('150', array_column($filtered->all(), 'price')));
+        $this->assertTrue(in_array('200', array_column($filtered->all(), 'price')));
+    }
+
+    /** @test */
+    function can_filter_collection_items_with_where_not_between()
+    {
+        $collection = collect([
+            ['product' => 'Desk', 'price' => 200],
+            ['product' => 'Chair', 'price' => 80],
+            ['product' => 'Bookcase', 'price' => 150],
+            ['product' => 'Pencil', 'price' => 30],
+            ['product' => 'Door', 'price' => 100],
+        ]);
+
+        $filtered = $collection->whereNotBetween('price', [100, 200]);
+        $expected = [
+            ['product' => 'Chair', 'price' => 80],
+            ['product' => 'Pencil', 'price' => 30],
+        ];
+        $this->assertEquals($expected, $filtered->all());
+    }
+
+    /** @test */
+    function can_filter_collection_items_with_where_not_in()
+    {
+        $collection = collect([
+            ['product' => 'Desk', 'price' => 200],
+            ['product' => 'Chair', 'price' => 100],
+            ['product' => 'Bookcase', 'price' => 150],
+            ['product' => 'Door', 'price' => 100],
+        ]);
+
+        $filtered = $collection->whereNotIn('price', [150, 200]);
+        $expected = [
+            ['product' => 'Chair', 'price' => 100],
+            ['product' => 'Door', 'price' => 100],
+        ];
+        $this->assertEquals($expected,$filtered->all());
     }
 
 }
