@@ -1649,7 +1649,15 @@ class CollectionTest extends TestCase
             ['product' => 'Chair', 'price' => 100],
             ['product' => 'Door', 'price' => 100],
         ];
-        $this->assertEquals($expected,$filtered->all());
+        $this->assertEquals($expected, $filtered->all());
+    }
+
+    /** @test */
+    function can_combine_collection_items_with_input_array()
+    {
+        $collection = collect(['Chair', 'Desk']);
+        $zipped = $collection->zip([100, 200]);
+        $this->assertEquals([['Chair', 100], ['Desk', 200]], $zipped->all());
     }
 
 }

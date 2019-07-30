@@ -1156,6 +1156,18 @@ class Collection
         }
     }
 
+    public function zip($arr)
+    {
+        $ans = [];
+        $i = 0;
+        foreach ($this->arr as $k) {
+            $ans[] = [$k , $arr[$i]];
+            $i++;
+        }
+
+        return collect($ans);
+    }
+
     public function getItems()
     {
         return $this->arr;
