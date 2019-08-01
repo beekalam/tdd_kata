@@ -77,5 +77,55 @@ class PySlicerTest extends TestCase
         $this->assertEquals(['Spam', 'SPAM!'], PySlicer::slice("1:", $l));
     }
 
+    /** @test */
+    function can_slice_negative_end()
+    {
+        $lst = ['Ajay', 'Bobby', 'Ashok', 'Vijay', 'Anil', 'Rahul', 'Alex', 'Christopher'];
+        $s = new PySlicer($lst);
+        $this->assertEquals(['Ashok', 'Vijay', 'Anil', 'Rahul'], $s->slicer(2, -2, 1));
+    }
+
+    /** @test */
+    function can_slice_negative_end_with_string()
+    {
+        $lst = ['Ajay', 'Bobby', 'Ashok', 'Vijay', 'Anil', 'Rahul', 'Alex', 'Christopher'];
+        $this->assertEquals(['Ashok', 'Vijay', 'Anil', 'Rahul'],PySlicer::slice('2:-2',$lst));
+    }
+
+    /** @test */
+    function can_slice_with_negative_end_and_step()
+    {
+        $lst = ['Ajay', 'Bobby','Ashok', 'Vijay', 'Anil', 'Rahul','Alex', 'Christopher'];
+        $s= new PySlicer($lst);
+        $this->assertEquals(['Bobby', 'Vijay', 'Rahul'],$s->slicer(1,-2,2));
+    }
+
+    /** @test */
+    function can_slice_with_negative_end_and_step_with_string()
+    {
+        $lst = ['Ajay', 'Bobby','Ashok', 'Vijay', 'Anil', 'Rahul','Alex', 'Christopher'];
+        $this->assertEquals(['Bobby', 'Vijay', 'Rahul'],PySlicer::slice("1:-2:2",$lst));
+    }
+
+    /** @test */
+    function can_slice_with_single_colon()
+    {
+        $lst = ['Ajay', 'Bobby','Ashok', 'Vijay', 'Anil', 'Rahul','Alex', 'Christopher'];
+        $this->assertEquals($lst,PySlicer::slice(":",$lst));
+    }
+
+    /** @test */
+    function can_slice_with_minus_one_step_and_empty_start_and_end()
+    {
+        $lst = ['Ajay', 'Bobby','Ashok', 'Vijay', 'Anil', 'Rahul','Alex', 'Christopher'];
+        $this->assertEquals(array_reverse($lst),PySlicer::slice("::-1",$lst));
+    }
+
+    /** @test */
+    function can_test_with_step_sand_empty_start_and_end()
+    {
+        $lst = ['Ajay', 'Bobby','Ashok', 'Vijay', 'Anil', 'Rahul','Alex', 'Christopher'];
+        $this->assertEquals(['Ajay', 'Ashok', 'Anil', 'Alex'],PySlicer::slice("::2",$lst));
+    }
 }
 

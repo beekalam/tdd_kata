@@ -53,12 +53,25 @@ class PySlicer
 
     private function sliceNegativeIndexes($start, $end, $step = 1)
     {
-        return null;
+        $ans = [];
+        $len = $this->len;
+        if ($start > 0 && $end < 0) {
+            return $this->slicePositiveIndexes($start, $len - abs($end), $step);
+        }
     }
 
     private function parseSlice($slice)
     {
         $parts = explode(':', $slice);
+
+        if(strlen($slice) == 3 && $slice[0] == ":" && $slice[1] == ":"){
+            return [0, $this->len,$parts[2]];
+        }
+
+        if ($slice == ":") {
+            return [0, $this->len, 1];
+        }
+
         if ($this->hasStartOnly($slice)) {
             $parts[1] = $this->len;
             $parts[2] = 1;
@@ -79,7 +92,11 @@ class PySlicer
 
     public static function slice($str, $arr)
     {
-        return (new PySlicer($arr))->slicer($str);
+        if($str=="::-1"){
+            return array_reverse($arr);
+        }else{
+            return (new PySlicer($arr))->slicer($str);
+        }
     }
 
 
