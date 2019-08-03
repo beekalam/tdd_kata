@@ -127,5 +127,14 @@ class PySlicerTest extends TestCase
         $lst = ['Ajay', 'Bobby','Ashok', 'Vijay', 'Anil', 'Rahul','Alex', 'Christopher'];
         $this->assertEquals(['Ajay', 'Ashok', 'Anil', 'Alex'],PySlicer::slice("::2",$lst));
     }
+
+    /** @test */
+    function should_work_with_empty_arrays()
+    {
+        $lst = [];
+        $this->assertEquals([],PySlicer::slice("::2",$lst));
+        $this->assertEquals([],PySlicer::slice("::-1",$lst));
+        $this->assertEquals([],PySlicer::slice(":",$lst));
+    }
 }
 
