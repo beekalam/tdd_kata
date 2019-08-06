@@ -26,9 +26,9 @@ class F{
 		return $this;
 	}
 
-    public function getLastResult()
-    {
-        return $this->lastResult;
-	}
+    // public function getLastResult()
+    // {
+    //     return $this->lastResult;
+	// }
 		
 }

@@ -5,6 +5,9 @@
         <testsuite name="unittests">
             <directory>./tests/unit</directory>
         </testsuite>
+        <testsuite name="dailycodingtests">
+            <directory>./tests/DailyCodingTests/</directory>
+        </testsuite>
     </testsuites>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
